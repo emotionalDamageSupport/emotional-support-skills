@@ -1,0 +1,17 @@
+{
+  "name": "emotional-support",
+  "owner": {
+    "name": "emotionalDamageSupport",
+    "url": "https://github.com/emotionalDamageSupport"
+  },
+  "description": "emotional-support-skills as an installable plugin.",
+  "plugins": [
+    {
+      "name": "emotional-support-skills",
+      "source": "./",
+      "description": "Agent skills for everyday engineering chores, starting with merge requests that come with a blast radius.",
+      "category": "engineering",
+      "keywords": ["skills", "merge-request", "pull-request"]
+    }
+  ]
+}

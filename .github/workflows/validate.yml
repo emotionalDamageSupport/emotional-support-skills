@@ -1,0 +1,20 @@
+name: Validate skills
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skill frontmatter, links, plugin manifest
+        run: python3 scripts/validate-skills.py
+      - name: Shell scripts
+        run: shellcheck scripts/*.sh skills/*/scripts/*.sh tests/*.sh
+      - name: check-title.sh regression tests
+        run: bash tests/check-title.test.sh
+      - name: Plugin manifests are valid JSON
+        run: python3 -m json.tool .claude-plugin/plugin.json >/dev/null && python3 -m json.tool .claude-plugin/marketplace.json >/dev/null
