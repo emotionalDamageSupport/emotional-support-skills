@@ -24,7 +24,11 @@ want_node=""
 node_hint=""
 if [ -n "$want_node" ]; then
   if command -v fnm >/dev/null 2>&1; then
-    eval "$(fnm env)" && fnm use "$want_node" >/dev/null || { echo "fnm: Node $want_node is not installed (fnm install $want_node)"; exit 1; }
+    eval "$(fnm env)"
+    if ! fnm use "$want_node" >/dev/null; then
+      echo "fnm: Node $want_node is not installed (fnm install $want_node)"
+      exit 1
+    fi
     node_hint="eval \"\$(fnm env)\" && fnm use $want_node"
   elif [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; then
     # shellcheck disable=SC1091
