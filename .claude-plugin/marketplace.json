@@ -9,7 +9,7 @@
     {
       "name": "emotional-support-skills",
       "source": "./",
-      "description": "Agent skills for everyday engineering chores, starting with merge requests that come with a blast radius.",
+      "description": "Agent skills for everyday engineering chores: merge requests with a blast radius, branch updates, black-box QA against requirements, and frontend checks in the browser.",
       "category": "engineering",
       "keywords": ["skills", "merge-request", "pull-request"]
     }
