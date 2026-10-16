@@ -17,8 +17,9 @@ NAME_RE = re.compile(r"^[a-z0-9-]{1,64}$")
 RESERVED = ("anthropic", "claude")
 DESCRIPTION_MAX = 1024
 BODY_MAX_LINES = 500
-# Only these keys are portable across agents (see README "Adding a skill").
-ALLOWED_KEYS = {"name", "description"}
+# Only name and description are portable across agents (see README "Adding a skill").
+# Claude Code invocation hints are allowed too: other agents ignore them.
+ALLOWED_KEYS = {"name", "description", "disable-model-invocation", "argument-hint"}
 
 problems: list[str] = []
 

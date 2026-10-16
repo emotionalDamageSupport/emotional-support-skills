@@ -17,7 +17,9 @@
   "skills": [
     "./skills/merge-request",
     "./skills/pull",
-    "./skills/pull-push"
+    "./skills/pull-push",
+    "./skills/blackbox-qa",
+    "./skills/frontend-verify"
   ],
   "license": "MIT"
 }
