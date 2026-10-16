@@ -1,6 +1,6 @@
 {
   "name": "emotional-support-skills",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Agent skills for everyday engineering chores, starting with merge requests that come with a blast radius.",
   "author": {
     "name": "emotionalDamageSupport",
