@@ -9,8 +9,10 @@ Agent skills for the chores that cause emotional damage. Plain [Agent Skills](ht
 | [`merge-request`](skills/merge-request/SKILL.md) | Commits if asked, drafts and opens a GitLab MR / GitHub PR: `<TASK-KEYS> <type>: [scope] <summary>` title, a short description with links to tasks and sources, and a **Blast radius** section at the end. Offers `pull-push` when the branch is behind. |
 | [`pull`](skills/pull/SKILL.md) | Merges the parent branch (main, release, or the branch it was cut from), resolves lockfile conflicts, then installs dependencies with the repo's Node version and package manager. |
 | [`pull-push`](skills/pull-push/SKILL.md) | `pull` and then `git push` in one go, no intermediate confirmations. Used by `merge-request`. |
+| [`blackbox-qa`](skills/blackbox-qa/SKILL.md) | Black-box QA of a feature against its requirements, through public APIs and the UI only, in the environment you name (isolated or shared): scenarios with evidence, a QA report and a verdict. Run it explicitly: `/blackbox-qa <requirements> <environment and URL> [access, timebox]`. |
+| [`frontend-verify`](skills/frontend-verify/SKILL.md) | Frontend work against a reference: picks the design reference before editing, then checks the result in a browser (scenario, console, layout, texts and translations) and fixes what it finds. Run it explicitly: `/frontend-verify <task or change to check>`. |
 
-`merge-request` calls `pull-push` when the branch is behind — install them together. `pull` and `pull-push` each carry their own copy of `scripts/install-deps.sh` so either works alone; edit both.
+`merge-request` calls `pull-push` when the branch is behind — install them together. `blackbox-qa` reads its design-review reference from `frontend-verify` — install them together too. Both run only when invoked (`disable-model-invocation`), since they are long procedures that small edits don't need; agents that ignore that field may still pick them up by description. `pull` and `pull-push` each carry their own copy of `scripts/install-deps.sh` so either works alone; edit both.
 
 ## Install
 
@@ -95,7 +97,7 @@ skills/<name>/references/    # loaded only when the skill points to them
 scripts/link-skills.sh       # local symlink install
 ```
 
-Adding a skill: create `skills/<name>/SKILL.md` with `name` and `description` frontmatter only (other fields aren't portable across agents), and add its path to `.claude-plugin/plugin.json`.
+Adding a skill: create `skills/<name>/SKILL.md` with `name` and `description` frontmatter (other fields aren't portable across agents; the only exceptions are Claude Code's `disable-model-invocation` and `argument-hint`, which other agents ignore), and add its path to `.claude-plugin/plugin.json`.
 
 ## Credits
 
