@@ -1,33 +1,33 @@
 #!/usr/bin/env node
-// Измерение страниц через Playwright: несколько URL × несколько ширин окна за один запуск.
-// Пишет в --out: measure-<label>-<W>x<H>.json, screenshot-<label>-<W>x<H>.png,
-// block-<label>-<W>x<H>.png (крупный план --shot-selector), console.json.
-// В stdout — по строке на страницу и ширину. Состояние приложения не меняет: только открывает URL и читает DOM.
+// Measures pages with Playwright: several URLs × several window widths in one run.
+// Writes to --out: measure-<label>-<W>x<H>.json, screenshot-<label>-<W>x<H>.png,
+// block-<label>-<W>x<H>.png (close-up of --shot-selector), console.json.
+// Prints one line per page and width. Doesn't change app state: only opens URLs and reads the DOM.
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// Холодная сборка dev server отдаёт первую страницу за 10–20 с; 30 с — запас, дольше страница уже не загрузится.
+// A dev server's cold build serves the first page in 10–20 s; 30 s leaves headroom, past that the page won't load.
 const DEFAULT_TIMEOUT_MS = '30000';
-// Типичная рабочая ширина десктопа и узкий ноутбук. Это запасной вариант: ширины из требований
-// или инструкций проекта передавай через --viewports.
+// A typical desktop working width and a narrow laptop. A fallback only: pass widths from the requirements
+// or the project's instructions with --viewports.
 const DEFAULT_VIEWPORTS = '1440x900,1024x768';
 
-const HELP = `Использование:
-  node measure.mjs --url [метка=]<URL> [--url ...] --selectors "<css1>,<css2>" [флаги]
+const HELP = `Usage:
+  node measure.mjs --url [label=]<URL> [--url ...] --selectors "<css1>,<css2>" [flags]
 
-Флаги:
-  --url [метка=]<URL>       страница; повторяй флаг для нескольких (например, ru=...&lang=ru en=...&lang=en)
-  --selectors <список>      CSS-селекторы через запятую (по умолчанию: body)
-  --viewports <список>      размеры окна WxH через запятую (по умолчанию: ${DEFAULT_VIEWPORTS})
-  --shot-selector <css>     дополнительно снять крупный план этого элемента (его и смотри в первую очередь)
-  --out <папка>             куда писать результат (по умолчанию: ./measure-out)
-  --storage-state <файл>    Playwright storage state для страниц за авторизацией
-  --wait-for <селектор>     дождаться элемента перед измерением
-  --timeout <мс>            таймаут загрузки и ожидания (по умолчанию: ${DEFAULT_TIMEOUT_MS})
-  --full-page               скриншот всей страницы, а не только окна
+Flags:
+  --url [label=]<URL>       a page; repeat the flag for several (e.g. ru=...&lang=ru en=...&lang=en)
+  --selectors <list>        comma-separated CSS selectors (default: body)
+  --viewports <list>        comma-separated WxH window sizes (default: ${DEFAULT_VIEWPORTS})
+  --shot-selector <css>     also take a close-up of this element (look at it first)
+  --out <dir>               where to write the results (default: ./measure-out)
+  --storage-state <file>    Playwright storage state for pages behind a login
+  --wait-for <selector>     wait for an element before measuring
+  --timeout <ms>            load and wait timeout (default: ${DEFAULT_TIMEOUT_MS})
+  --full-page               screenshot the whole page, not just the window
 `;
 
 function parseArgs(argv) {
@@ -43,7 +43,7 @@ function parseArgs(argv) {
 }
 
 function loadPlaywright() {
-  // Сначала локальная установка проекта, затем глобальная (npm root -g).
+  // The project's own install first, then the global one (npm root -g).
   const require = createRequire(join(process.cwd(), 'noop.js'));
   for (const name of ['playwright', '@playwright/test']) {
     try { return require(name); } catch {}
@@ -66,9 +66,9 @@ if (args.help || !args.urls.length) {
 
 const pw = loadPlaywright();
 if (!pw) {
-  console.error('Playwright не найден ни в проекте, ни глобально.\n' +
-    'Варианты: установить во временную папку (`npm i playwright` вне репозитория) ' +
-    'или использовать scripts/measure-snippet.js через уже доступный браузерный инструмент.');
+  console.error('Playwright is not installed in the project or globally.\n' +
+    'Options: install it into a temporary folder (`npm i playwright` outside the repository) ' +
+    'or use scripts/measure-snippet.js through a browser tool you already have.');
   process.exit(3);
 }
 
@@ -77,7 +77,7 @@ const snippet = readFileSync(join(here, 'measure-snippet.js'), 'utf8');
 const selectors = args.selectors.split(',').map((s) => s.trim()).filter(Boolean);
 const viewports = args.viewports.split(',').map((v) => {
   const m = /^(\d+)x(\d+)$/.exec(v.trim());
-  if (!m) { console.error(`Неверный размер окна: "${v}", нужен формат 1440x900`); process.exit(2); }
+  if (!m) { console.error(`Invalid window size: "${v}", expected the 1440x900 format`); process.exit(2); }
   return { width: Number(m[1]), height: Number(m[2]) };
 });
 const pages = args.urls.map((u, i) => {
@@ -110,7 +110,7 @@ try {
         await page.goto(url, { waitUntil: 'networkidle', timeout });
         if (args.waitFor) await page.waitForSelector(args.waitFor, { timeout });
       } catch (e) {
-        console.error(`[${tag}] страница не загрузилась: ${e.message.split('\n')[0]}`);
+        console.error(`[${tag}] page did not load: ${e.message.split('\n')[0]}`);
         exitCode = 1;
         await context.close();
         continue;
@@ -125,18 +125,18 @@ try {
       }
 
       const flags = [];
-      if (result.page.horizontalScroll) flags.push(`горизонтальный скролл (scrollWidth ${result.page.scrollWidth} > ${result.page.clientWidth})`);
-      if (result.overlaps.length) flags.push(`наложения: ${result.overlaps.map((p) => p.join(' × ')).join('; ')}`);
-      if (result.rawTranslationKeyCandidates.length) flags.push(`похоже на сырые ключи: ${result.rawTranslationKeyCandidates.join(', ')}`);
+      if (result.page.horizontalScroll) flags.push(`horizontal scroll (scrollWidth ${result.page.scrollWidth} > ${result.page.clientWidth})`);
+      if (result.overlaps.length) flags.push(`overlaps: ${result.overlaps.map((p) => p.join(' × ')).join('; ')}`);
+      if (result.rawTranslationKeyCandidates.length) flags.push(`looks like raw translation keys: ${result.rawTranslationKeyCandidates.join(', ')}`);
       for (const [sel, info] of Object.entries(result.elements)) {
         if (info.error) flags.push(`${sel}: ${info.error}`);
-        else if (info.count === 0) flags.push(`${sel}: не найден`);
+        else if (info.count === 0) flags.push(`${sel}: not found`);
         else info.items.forEach((it, i) => {
-          if (it.truncated) flags.push(`${sel}[${i}]: текст обрезан`);
-          if (it.outsideViewportX) flags.push(`${sel}[${i}]: выходит за окно по горизонтали`);
+          if (it.truncated) flags.push(`${sel}[${i}]: text clipped`);
+          if (it.outsideViewportX) flags.push(`${sel}[${i}]: overflows the window horizontally`);
         });
       }
-      console.log(`[${tag}] ${flags.length ? flags.join(' | ') : 'явных проблем не найдено'}`);
+      console.log(`[${tag}] ${flags.length ? flags.join(' | ') : 'no obvious problems found'}`);
       await context.close();
     }
   }
@@ -144,5 +144,5 @@ try {
   await browser.close();
 }
 writeFileSync(join(outDir, 'console.json'), JSON.stringify(consoleLog, null, 2));
-console.log(`Замеры и скриншоты: ${outDir}; консоль и запросы: ${consoleLog.length} записей → console.json`);
+console.log(`Measurements and screenshots: ${outDir}; console and requests: ${consoleLog.length} entries → console.json`);
 process.exit(exitCode);

@@ -1,8 +1,8 @@
-// measureUi(selectors, options) — измерение отображаемого интерфейса в браузере.
-// Вставь файл целиком в evaluate браузерного инструмента, затем вызови:
+// measureUi(selectors, options) — measures the rendered interface in the browser.
+// Paste the whole file into the browser tool's evaluate, then call:
 //   measureUi(['.form', '.field', 'textarea'])
-// Только читает DOM и computed styles; состояние приложения не меняет.
-// options.maxPerSelector — сколько элементов на селектор описывать (по умолчанию 5).
+// Only reads the DOM and computed styles; doesn't change app state.
+// options.maxPerSelector — how many elements to describe per selector (default 5).
 function measureUi(selectors, options) {
   const opts = Object.assign({ maxPerSelector: 5 }, options || {});
   const STYLE_PROPS = [
@@ -30,7 +30,7 @@ function measureUi(selectors, options) {
       tag: el.tagName.toLowerCase(),
       id: el.id || undefined,
       classes: el.className && typeof el.className === 'string' ? el.className : undefined,
-      // 80 символов хватает, чтобы узнать элемент в отчёте, и не раздувают вывод.
+      // 80 characters are enough to recognise the element in a report without bloating the output.
       text: (el.innerText || el.value || '').trim().slice(0, 80) || undefined,
       rect: { x: round(r.x), y: round(r.y), width: round(r.width), height: round(r.height), right: round(r.right), bottom: round(r.bottom) },
       visible: r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none',
@@ -72,7 +72,7 @@ function measureUi(selectors, options) {
     items.forEach((it, i) => { if (it.visible) measured.push({ sel: sel + '[' + i + ']', rect: it.rect, el: nodes[i] }); });
   }
 
-  // Наложения между измеренными элементами, кроме вложенных друг в друга.
+  // Overlaps between measured elements, except ones nested in each other.
   for (let i = 0; i < measured.length; i++) {
     for (let j = i + 1; j < measured.length; j++) {
       const a = measured[i], b = measured[j];
@@ -81,7 +81,7 @@ function measureUi(selectors, options) {
     }
   }
 
-  // Видимый текст вида "section.sub.key" или "section.sub_key" — похоже на непереведённый ключ.
+  // Visible text like "section.sub.key" or "section.sub_key" looks like an untranslated key.
   const KEY_RE = /^[a-zA-Z][\w-]*(\.[\w-]+){1,}$/;
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   const seen = new Set();

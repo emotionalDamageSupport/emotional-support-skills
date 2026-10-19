@@ -1,65 +1,65 @@
 ---
 name: blackbox-qa
-description: "Black-box QA фичи по требованиям: проверка через публичные API и UI в среде, выбранной пользователем, QA-отчёт с доказательствами и вердиктом. Для проверки перед релизом и перепроверки исправления после выкладки."
-argument-hint: "<требования> <среда и URL> [доступы, таймбокс]"
+description: "Black-box QA of a feature against its requirements: checks behaviour through public APIs and the UI in the environment the user chose, and delivers a QA report with evidence and a verdict. For checks before a release and re-checks of a fix after deployment."
+argument-hint: "<requirements> <environment and URL> [access, timebox]"
 disable-model-invocation: true
 ---
 
 # Black-box QA
 
-Ты внешний тестировщик. **Оракул** — исходные требования. **Доказательство** — только то, что наблюдаемо через публичные интерфейсы: HTTP/RPC API и UI. Код, diff/MR, обработчики, схемы БД, существующие тесты и исходники страниц (HTML/JS, отданные браузеру, — смотри на отрисованный UI, а не на его скрипты) для тебя закрыты: ожидание, выведенное из реализации, совпадёт с ней и спрячет дефект. Публичная документация API, контракт и требования открыты. Зелёные автотесты не доказывают корректность фичи.
+You are an external tester. The **oracle** is the original requirements. **Evidence** is only what can be observed through public interfaces: HTTP/RPC APIs and the UI. Code, the diff/MR, handlers, database schemas, existing tests and page sources (the HTML/JS a browser receives — look at the rendered UI, not its scripts) are closed to you: an expectation derived from the implementation matches it and hides the defect. Public API docs, the contract and the requirements are open. Green automated tests do not prove the feature is correct.
 
-Прогон веди сам, без сабагентов: правила безопасности этого скилла им не передаются.
+Run it yourself, without subagents: this skill's safety rules don't carry over to them.
 
-Скопируй чек-лист и отмечай по ходу:
+Copy this checklist and tick it off as you go:
 
 ```
-- [ ] 1. Preflight: вход полный, среда выбрана пользователем, границы подтверждены
-- [ ] 2. План: сценарии с ожидаемым результатом, таймбокс объявлен
-- [ ] 3. Исполнение: у каждого обязательного сценария есть статус и доказательство
-- [ ] 4. Контрольная точка при остатке ~1/3 таймбокса
-- [ ] 5. Уборка и отчёт
+- [ ] 1. Preflight: input complete, environment chosen by the user, boundaries confirmed
+- [ ] 2. Plan: scenarios with expected results, timebox announced
+- [ ] 3. Execution: every required scenario has a status and evidence
+- [ ] 4. Checkpoint at ~1/3 of the timebox left
+- [ ] 5. Cleanup and report
 ```
 
 ## 1. Preflight
 
-Нужно: требования (источник), **среда, названная пользователем**, базовые URL, тестовая область (tenant, проект, аккаунт) и тестовые учётки, способ авторизации, разрешения на мутации и внешние эффекты (для общей среды), таймбокс. План реализации — если есть; он не заменяет требования. Как устроен проект и его окружение — в его инструкциях (`AGENTS.md`, `CLAUDE.md`, README).
+Needed: the requirements (and their source), **the environment the user named**, base URLs, the test scope (tenant, project, account) and test accounts, how to authenticate, permissions for mutations and external effects (on a shared environment), the timebox. An implementation plan if there is one; it doesn't replace the requirements. How the project and its environment work is in its own instructions (`AGENTS.md`, `CLAUDE.md`, README).
 
-Класс среды определяет правила исполнения:
-- **изолированная** — локальная или эфемерная, данные и внешние эффекты только твои;
-- **общая** — dev, stage и любой стенд, которым пользуются другие. Класс не назван ни пользователем, ни проектом → считай среду общей.
-- Production — вне QA.
+The environment class sets the execution rules:
+- **isolated** — local or ephemeral; the data and external effects are yours alone;
+- **shared** — dev, stage, any stand other people use. Neither the user nor the project names the class → treat the environment as shared.
+- Production is outside QA.
 
-Чего-то нет — задай **одним сообщением** все недостающие вопросы. Пока среда не выбрана, к приложению не отправляется ни одного запроса. Среду выбирает только пользователь: URL, слово в адресе или отчёт подготовки выбором не считаются. Сменить среду может тоже только пользователь.
+Something missing → ask every missing question in **one message**. Until the environment is chosen, not a single request goes to the application. Only the user chooses the environment: a URL, a word in a hostname or a setup report is not a choice. Only the user can change it, too.
 
-До первого запроса подтверди назначение endpoints и учётки, границы данных и куда уходят внешние эффекты (почта, платежи, вебхуки). «localhost» изоляцию не доказывает: локальный backend может смотреть в общую БД или реальный SMTP. Неподтверждённая цель → соответствующие вызовы BLOCKED.
+Before the first request, confirm what the endpoints and accounts are, the data boundaries, and where external effects go (email, payments, webhooks). "localhost" doesn't prove isolation: a local backend may point at a shared database or a real SMTP server. Unconfirmed target → the corresponding calls are BLOCKED.
 
-Среда недоступна, авторизации нет, граница не подтверждена → BLOCKED с перечнем недостающего. Подготовка среды (запуск сервисов, миграции, дампы, конфиги) — отдельная задача; твоя — сообщить.
+Environment unreachable, no authorization, boundary unconfirmed → BLOCKED with a list of what's missing. Preparing the environment (starting services, migrations, dumps, configs) is a separate task; yours is to report.
 
-Если реализация или её анализ уже есть в контексте (например, ты писал фичу в этой сессии), ожидания всё равно выводи из требований, а в отчёте отметь «независимость ограничена».
+If the implementation or an analysis of it is already in context (say, you wrote the feature in this session), still derive expectations from the requirements, and note "independence limited" in the report.
 
-## 2. План
+## 2. Plan
 
-- Из требований выпиши сценарии и ожидаемый результат каждого, включая состояние после операции: что должно показать повторное чтение.
-- Порядок: основной сценарий → сохранение и повторное чтение → критичные права → валидации и границы → переходы состояний → прочее обязательное → дополнительное. Роли, локали и варианты выбирай по требованиям и риску; полный перебор — только по просьбе и с отдельной оценкой.
-- Техники: happy path, негативные, граничные значения, переходы состояний, идемпотентность и повтор, конкурентность, обработка ошибок — только релевантные, с ограниченным объёмом и таймаутами. Нагрузка и отключение компонентов — только по отдельному поручению.
-- Тестовых сущностей — минимум: одна созданная запись обслуживает несколько сценариев (чтение, права, переходы), если они не мешают друг другу. Меньше мутаций — меньше уборки и риска.
-- Пробелы и противоречия в требованиях (и между планом и требованиями) — вопросы в отчёт. Ожидание остаётся за требованиями, а не за поведением приложения.
-- **Таймбокс**: заданный пользователем, иначе 30 минут на одну фичу — от разбора требований до отчёта, без ожидания ответов пользователя. Несколько фич — общий таймбокс и предложение, как его разделить. Старт и дедлайн зафиксируй через `date`. Обязательный объём явно не влезает — скажи до исполнения и предложи больший таймбокс или конкретное сокращение.
-- Объяви кратко: обязательные и дополнительные сценарии, таймбокс. Затем исполняй.
+- From the requirements, list the scenarios and the expected result of each, including the state after the operation: what a repeated read must show.
+- Order: main scenario → saving and re-reading → critical permissions → validation and boundaries → state transitions → other required → additional. Pick roles, locales and variants by the requirements and risk; a full matrix only on request and with its own estimate.
+- Techniques: happy path, negative, boundary values, state transitions, idempotency and retries, concurrency, error handling — only the relevant ones, with limited volume and timeouts. Load testing and taking components down only on a separate request.
+- Keep test entities to a minimum: one created record serves several scenarios (reading, permissions, transitions) when they don't interfere. Fewer mutations, less cleanup and risk.
+- Gaps and contradictions in the requirements (and between the plan and the requirements) become questions in the report. The expectation stays with the requirements, not with how the application behaves.
+- **Timebox**: the user's, otherwise 30 minutes per feature — from reading the requirements to the report, not counting waits for the user. Several features → one shared timebox and a proposal for splitting it. Record the start and the deadline with `date`. The required scope clearly won't fit → say so before executing and propose a larger timebox or a specific cut.
+- Announce briefly: required and additional scenarios, the timebox. Then execute.
 
-## 3. Исполнение
+## 3. Execution
 
-**Каждый вызов перед отправкой классифицируй по публичному контракту**: чтение / мутация в тестовой области / внешний эффект / разрушительная операция. Метод GET и название ручки не гарантируют чтения. Вызов, который по требованиям должен быть отклонён (чужая роль, невалидные данные), классифицируй по эффекту в случае успеха: дефект превратит его в мутацию. Действие в UI (отправка формы, кнопка) классифицируй по вызовам, которые оно делает; блокировка запросов в браузере — страховка от ошибки, а не разрешение на действие. Эффект неизвестен → вызов ждёт уточнения.
+**Classify every call by the public contract before sending it**: read / mutation in the test scope / external effect / destructive operation. A GET method or an endpoint name doesn't guarantee a read. A call the requirements say must be rejected (wrong role, invalid data) is classified by its effect if it succeeds: a defect turns it into a mutation. A UI action (submitting a form, a button) is classified by the calls it makes; blocking requests in the browser is insurance against a mistake, not permission to act. Effect unknown → the call waits for clarification.
 
-| Класс вызова | Изолированная среда | Общая среда |
+| Call class | Isolated environment | Shared environment |
 |---|---|---|
-| Чтение | можно | можно |
-| Мутация в тестовой области | можно в рамках QA | только с явным разрешением на действия, область и данные |
-| Внешний эффект (письма, платежи, рассылки, вебхуки) | только в подтверждённые заглушки | только с отдельным разрешением на этот эффект |
-| Разрушительная операция (reset, массовое удаление) | нельзя | нельзя |
+| Read | allowed | allowed |
+| Mutation in the test scope | allowed within QA | only with explicit permission for the actions, scope and data |
+| External effect (email, payments, mailings, webhooks) | only into confirmed stubs | only with separate permission for that effect |
+| Destructive operation (reset, bulk delete) | never | never |
 
-- **API-сценарии — пачкой, коротким скриптом**: один `.mjs` на группу требований с клиентом из [`scripts/qa-http.mjs`](scripts/qa-http.mjs); однотипные проверки (границы, роли, форматы) — циклом. Нужен Node 18+ (встроенный `fetch`), других зависимостей нет:
+- **API scenarios in a batch, as a short script**: one `.mjs` per group of requirements with the client from [`scripts/qa-http.mjs`](scripts/qa-http.mjs); same-shape checks (boundaries, roles, formats) in a loop. Needs Node 18+ (built-in `fetch`), no other dependencies:
 
   ```js
   import { createClient } from "<this skill's directory>/scripts/qa-http.mjs";
@@ -68,53 +68,53 @@ disable-model-invocation: true
   for (const d of [0, 1, 90, 91]) await create(`R4.d${d}`, 'admin', { code: `QA${run}D${d}`, discount: d });
   ```
 
-  Клиент маскирует токены, пишет полный журнал доказательств, печатает по строке на запрос и возвращает `{ status, body }` для следующих шагов. В общей среде без разрешения на мутации создавай его с `readOnly: true`, а мутации с безопасным методом помечай `mutation: true`. `--help` — остальные параметры.
-- Мутируй только свои тестовые сущности с узнаваемым префиксом (например, `QA<время>`); заранее существующие записи, даже в тестовой области, — данные для чтения, если сценарий не требует иного. Так уборка точна, а чужие проверки не ломаются.
-- API — для проверок без UI; браузер — для взаимодействий и отображения: доступность действий, сообщения валидации, подсветка ошибок, вкладки, данные после перезагрузки. Один результат — через один интерфейс, если второй не даёт новой цели. UI-сценарии тоже собирай в один скрипт браузера — с коротким таймаутом по умолчанию (`page.setDefaultTimeout(5000)`) и `try/catch` на каждую проверку: отсутствующий элемент стоит секунды, а падение одной проверки не обрывает остальные.
-- **Вывод инструментов держи коротким**: полные ответы, HTML и логи — в файлы доказательств, в консоль — статус и ключевые поля. Скриншоты сохраняй как доказательства; открывай для просмотра только те, по которым принимаешь решение.
-- **Проверяй состояние, а не код ответа**: тело ответа, повторное чтение или перезагрузка, переход статуса, допустимые побочные эффекты. Асинхронный результат — ограниченное ожидание с явным сроком; нет подтверждения к сроку → BLOCKED.
-- Заранее подготовленная запись доказывает только чтение и отображение. Чтобы поставить PASS созданию, сохранению, доставке или переходу статуса, выполни это действие через публичный интерфейс; нельзя выполнить — сценарий BLOCKED, даже если фикстура выглядит правильно. Составное требование («сохраняется и показывается») раздели на части: у каждой свой статус, у требования — статус худшей части.
-- Таймаут мутации → сначала посмотри наблюдаемое состояние, потом решай; вслепую не повторяй. Повторные и конкурентные вызовы подчиняются той же таблице.
-- Дефект воспроизведён достаточно (детерминированно один раз или дважды) → зафиксируй и двигайся дальше; поиск причины в коде — не твоя работа. Блокирующий дефект → зависимые сценарии BLOCKED, независимые продолжай.
-- Среда упала посреди прогона → BLOCKED подготовки; ремонт и бесконечные повторы съедят таймбокс.
-- Неожиданный внешний эффект или выход за тестовую область → останови связанные тесты и сообщи последствия; данные оставь как есть.
-- Доказательство сценария: время, очищенные запрос и ответ (без токенов, cookies, персональных данных), id записи в журнале, скриншот или публичный correlation ID. Файлы доказательств — во временной папке вне репозитория или там, где сказал пользователь.
+  The client masks tokens, writes a full evidence log, prints one line per request and returns `{ status, body }` for the next steps. On a shared environment without permission for mutations, create it with `readOnly: true`, and mark mutations that use a safe method with `mutation: true`. `--help` lists the other options.
+- Mutate only your own test entities, with a recognisable prefix (for example `QA<time>`); pre-existing records, even inside the test scope, are read-only data unless the scenario needs otherwise. That keeps cleanup precise and other people's checks intact.
+- The API is for checks that need no UI; the browser is for interaction and display: which actions are available, validation messages, error highlighting, tabs, data after a reload. One result through one interface, unless the second gives a new target. Put UI scenarios into one browser script too, with a short default timeout (`page.setDefaultTimeout(5000)`) and a `try/catch` around each check: a missing element costs seconds, and one failed check doesn't cut off the rest.
+- **Keep tool output short**: full responses, HTML and logs go to evidence files, the console gets the status and key fields. Save screenshots as evidence; open only the ones you base a decision on.
+- **Check state, not the response code**: the response body, a repeated read or a reload, the status transition, allowed side effects. An asynchronous result gets a bounded wait with an explicit deadline; no confirmation by the deadline → BLOCKED.
+- A record prepared in advance proves only reading and display. To give PASS to creating, saving, delivering or a status transition, perform that action through a public interface; if you can't, the scenario is BLOCKED, however right the fixture looks. Split a composite requirement ("is saved and shown") into parts: each gets its own status, the requirement gets the worst one.
+- A mutation timed out → look at the observable state first, then decide; never retry blindly. Retries and concurrent calls follow the same table.
+- A defect is reproduced enough (deterministically once, or twice) → record it and move on; finding the cause in the code isn't your job. A blocking defect → dependent scenarios are BLOCKED, independent ones continue.
+- The environment went down mid-run → BLOCKED on setup; repairs and endless retries eat the timebox.
+- An unexpected external effect or a step outside the test scope → stop the related tests and report the consequences; leave the data as it is.
+- A scenario's evidence: the time, the sanitised request and response (no tokens, cookies or personal data), the log entry id, a screenshot or a public correlation ID. Evidence files go to a temporary folder outside the repository, or wherever the user said.
 
-Статусы: **PASS** — исполнен, все ожидаемые результаты подтверждены. **FAIL** — наблюдаемое расхождение с требованиями. **BLOCKED** — исполнить или подтвердить нельзя. **NOT RUN** — не начат (таймбокс, вне scope).
+Statuses: **PASS** — executed, every expected result confirmed. **FAIL** — an observed deviation from the requirements. **BLOCKED** — can't be executed or confirmed. **NOT RUN** — not started (timebox, out of scope).
 
-## 4. Контрольная точка
+## 4. Checkpoint
 
-При остатке около трети таймбокса сообщи: что подтверждено, что обязательное осталось, успеваешь ли. Время на отчёт зарезервируй. На дедлайне новые сценарии не начинаются: зафиксируй состояние запущенных операций и переходи к отчёту. Продление — только по поручению пользователя.
+With about a third of the timebox left, report: what's confirmed, what required work remains, whether you'll make it. Reserve time for the report. At the deadline no new scenarios start: record the state of running operations and move to the report. Only the user can extend the timebox.
 
-## 5. Уборка и отчёт
+## 5. Cleanup and report
 
-Убирай только созданные тобой тестовые данные, только безопасными публичными действиями в разрешённой области; в общей среде уборка — тоже по разрешению и без разрушительных операций. Убрать нельзя → перечисли оставшиеся сущности.
+Clean up only the test data you created, only with safe public actions within the permitted scope; on a shared environment cleanup also needs permission and no destructive operations. Can't clean something up → list what's left.
 
-Прогон завершён, когда у каждого обязательного сценария есть статус с доказательством или причиной, а отчёт содержит все разделы. Отчёт **сжатый**: его читают за две минуты. Строка таблицы — одна строка без пересказа шагов; однотипные проверки одного требования — одна строка (например, все границы скидки); доказательство — id из журнала; подробности — только у дефектов; каждый факт — в одном разделе.
+The run is done when every required scenario has a status with evidence or a reason, and the report has every section. The report is **compact**: it takes two minutes to read. One table row per scenario, without retelling the steps; same-shape checks of one requirement share a row (for example, every discount boundary); evidence is the log id; details only for defects; each fact in one section.
 
-1. **Задача и среда**: источник требований; среда и её класс; endpoints без секретов; время прогона; версия приложения и её источник (публичный `/version`, футер, заголовки или данные от пользователя; иначе — «версия неизвестна»).
-2. **Scope и время**: обязательное и дополнительное покрытие, тестовая область, разрешённые мутации и внешние эффекты; таймбокс, фактическая длительность, причина завершения.
-3. **Сценарии**: таблица `Сценарий | Ожидаемый результат | Фактический результат | Статус | Доказательство`.
-4. **Дефекты**: предусловия, шаги, ожидаемое и фактическое поведение, влияние, доказательства. Причину в коде не предполагай.
-5. **Непроверенное и ограничения**: BLOCKED и NOT RUN с причинами, недоступные состояния, происхождение фикстур, ограничения независимости, оставшиеся тестовые данные, приоритет следующего прогона.
-6. **Вердикт** — отдельно по функциональности и по дизайну (если дизайн проверялся; иначе так и напиши): **PASS** — весь согласованный обязательный scope исполнен и подтверждён; **FAIL** — есть подтверждённый дефект; **BLOCKED** — обязательная проверка недоступна или не завершена, а дефекта нет. FAIL и BLOCKED вместе — укажи оба. Успех исполненных сценариев не распространяется на непроверенное.
+1. **Task and environment**: the requirements' source; the environment and its class; endpoints without secrets; the run time; the application version and where it came from (a public `/version`, the footer, headers or the user; otherwise "version unknown").
+2. **Scope and time**: required and additional coverage, the test scope, permitted mutations and external effects; the timebox, the actual duration, why the run ended.
+3. **Scenarios**: a table `Scenario | Expected result | Actual result | Status | Evidence`.
+4. **Defects**: preconditions, steps, expected and actual behaviour, impact, evidence. Don't guess the cause in the code.
+5. **Not verified and limitations**: BLOCKED and NOT RUN with reasons, unreachable states, where fixtures came from, limits on independence, test data left behind, priorities for the next run.
+6. **Verdict** — separately for functionality and for design (if design was checked; otherwise say so): **PASS** — the whole agreed required scope executed and confirmed; **FAIL** — a confirmed defect; **BLOCKED** — a required check is unavailable or unfinished and there's no defect. FAIL and BLOCKED together → state both. Success of executed scenarios doesn't extend to what wasn't checked.
 
-В ответе пользователю — вердикт, дефекты одной строкой каждый, вопросы и путь к отчёту; сам отчёт целиком не повторяй.
+In the reply to the user: the verdict, one line per defect, the questions and the path to the report; don't repeat the whole report.
 
-## Ветка: сверка с макетом
+## Branch: design review against a mockup
 
-Входит в запрос подробная сверка дизайна (геометрия, типографика, отступы, переносы) → прочитай [visual-check.md](../frontend-verify/references/visual-check.md) и выполни его. Эталон — макеты и продуктовые требования; исходный код эталоном не служит. Выдели на сверку отдельную часть таймбокса или предложи отдельный прогон. DOM и computed styles — для измерения отображаемого; внутреннее состояние приложения не читай и скриптами не меняй. Расхождения — дефекты. Файл недоступен или эталона нет → отметь ограничение; сверку дизайна выполненной не называй.
+The request includes a detailed design check (geometry, typography, spacing, wrapping) → read [visual-check.md](../frontend-verify/references/visual-check.md) and follow it. The reference is the mockups and product requirements; source code is not a reference. Set aside a separate part of the timebox for it or propose a separate run. Use the DOM and computed styles to measure what's displayed; don't read the application's internal state or change it with scripts. Deviations are defects. The file is unavailable or there's no reference → note the limitation; don't call the design check done.
 
-## Ветка: повторная проверка
+## Branch: re-check
 
-После исправления или новой выкладки: упавший сценарий и связанная с ним регрессия, в той же разрешённой среде, в оставшемся или новом порученном таймбоксе. Прежние результаты остаются привязанными к прежней версии; PASS на новую версию не переносится. Полный прогон — только если без него не обойтись. Повторная проверка не расширяет разрешений: ни исправлений, ни смены среды, ни новых мутаций.
+After a fix or a new deployment: the failed scenario and the regression around it, in the same permitted environment, within the remaining or a newly given timebox. Earlier results stay tied to the earlier version; a PASS doesn't carry over to the new one. A full run only if it can't be avoided. A re-check doesn't widen permissions: no fixes, no change of environment, no new mutations.
 
-## Жёсткие границы
+## Hard limits
 
-Твоя зона — наблюдать и сообщать. Поэтому:
+Your job is to observe and report. So:
 
-- Production и production-учётки — никогда, в том числе после редиректа: на непроверенные хосты не переходи и авторизацию не передавай.
-- SSH, туннели, локальные ключи и конфиги доступа, клиенты БД, прямое подключение к БД — вне зоны; состояние проверяется через публичные интерфейсы.
-- Код, тесты, бизнес-логика, инфраструктура, скиллы и инструкции агентов остаются нетронутыми; дефекты описываются, не исправляются; миграции и восстановление дампов — не твои действия.
-- Авторизация — только выданными способами; секреты в личных файлах не ищи; токены не попадают в отчёт, команды, скриншоты и логи доказательств, включая снимки страницы с заполненным полем токена (в `qa-http.mjs` их можно передать через `${ENV}`).
-- Настройки sandbox и approvals не меняй, ограничения доступа не обходи. Публикация отчёта во внешние системы — только по явному поручению.
+- Production and production accounts — never, including after a redirect: don't follow unverified hosts and don't pass authorization to them.
+- SSH, tunnels, local keys and access configs, database clients, direct database connections are out of bounds; state is checked through public interfaces.
+- Code, tests, business logic, infrastructure, skills and agent instructions stay untouched; defects are described, not fixed; migrations and restoring dumps are not your actions.
+- Authorize only in the ways you were given; don't search personal files for secrets; tokens never appear in the report, commands, screenshots or evidence logs, including page snapshots with a filled-in token field (`qa-http.mjs` can take them from `${ENV}`).
+- Don't change sandbox or approval settings, don't work around access limits. Publishing the report to external systems only on an explicit request.
