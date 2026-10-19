@@ -5,6 +5,12 @@
 import { readFileSync, appendFileSync, mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
+// Ответ API обычно приходит за доли секунды; 15 с покрывают медленный стенд и холодный старт,
+// но не дают зависшему запросу съесть таймбокс прогона.
+const DEFAULT_TIMEOUT_MS = 15000;
+// 160 символов — примерно две строки терминала: видно статус и код ошибки; полный ответ — в журнале.
+const DEFAULT_WIDTH = 160;
+
 const HELP = `Использование:
   в коде (основной способ):  import { createClient } from 'qa-http.mjs'
     const qa = createClient({ baseUrl, headers, auth: { admin: 'Bearer \${QA_ADMIN}' }, log, readOnly });
@@ -17,8 +23,8 @@ const HELP = `Использование:
   --read-only         исполнять только GET/HEAD/OPTIONS и запросы без "mutation": true;
                       остальные пропускаются с пометкой BLOCKED (для общих сред без разрешения)
   --only <id,id>      исполнить только перечисленные id
-  --width <N>         сколько символов тела ответа печатать (по умолчанию 160)
-  --timeout <мс>      таймаут запроса (по умолчанию 15000)
+  --width <N>         сколько символов тела ответа печатать (по умолчанию ${DEFAULT_WIDTH})
+  --timeout <мс>      таймаут запроса (по умолчанию ${DEFAULT_TIMEOUT_MS})
 
 Формат сценариев:
 {
@@ -47,7 +53,7 @@ const mask = (h) => Object.fromEntries(Object.entries(h).map(([k, v]) => [k, SEC
 //   const qa = createClient({ baseUrl, headers, auth: { admin: 'Bearer ${QA_ADMIN}' }, log: 'evidence/api-log.jsonl', readOnly: false });
 //   for (const d of [0, 1, 90, 91]) await qa.call(`R4.d${d}`, { as: 'admin', method: 'POST', path: '/api/items', json: { discount: d } });
 // call() печатает одну строку и возвращает { status, body } (body — разобранный JSON или текст).
-export function createClient({ baseUrl, headers = {}, auth = {}, log, readOnly = false, width = 160, timeout = 15000 }) {
+export function createClient({ baseUrl, headers = {}, auth = {}, log, readOnly = false, width = DEFAULT_WIDTH, timeout = DEFAULT_TIMEOUT_MS }) {
   if (!log) throw new Error('createClient: нужен log — путь к журналу доказательств');
   mkdirSync(dirname(resolve(log)), { recursive: true });
   return {
@@ -103,7 +109,7 @@ if (isCli) await cli();
 async function cli() {
 const args = process.argv.slice(2);
 if (!args.length || args.includes('--help') || args.includes('-h')) { process.stdout.write(HELP); process.exit(args.length ? 0 : 2); }
-const opt = { width: 160, timeout: 15000 };
+const opt = { width: DEFAULT_WIDTH, timeout: DEFAULT_TIMEOUT_MS };
 let file;
 for (let i = 0; i < args.length; i++) {
   const a = args[i];

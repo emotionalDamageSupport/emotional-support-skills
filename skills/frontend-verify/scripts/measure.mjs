@@ -9,23 +9,29 @@ import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// Холодная сборка dev server отдаёт первую страницу за 10–20 с; 30 с — запас, дольше страница уже не загрузится.
+const DEFAULT_TIMEOUT_MS = '30000';
+// Типичная рабочая ширина десктопа и узкий ноутбук. Это запасной вариант: ширины из требований
+// или инструкций проекта передавай через --viewports.
+const DEFAULT_VIEWPORTS = '1440x900,1024x768';
+
 const HELP = `Использование:
   node measure.mjs --url [метка=]<URL> [--url ...] --selectors "<css1>,<css2>" [флаги]
 
 Флаги:
   --url [метка=]<URL>       страница; повторяй флаг для нескольких (например, ru=...&lang=ru en=...&lang=en)
   --selectors <список>      CSS-селекторы через запятую (по умолчанию: body)
-  --viewports <список>      размеры окна WxH через запятую (по умолчанию: 1440x900,1024x768)
+  --viewports <список>      размеры окна WxH через запятую (по умолчанию: ${DEFAULT_VIEWPORTS})
   --shot-selector <css>     дополнительно снять крупный план этого элемента (его и смотри в первую очередь)
   --out <папка>             куда писать результат (по умолчанию: ./measure-out)
   --storage-state <файл>    Playwright storage state для страниц за авторизацией
   --wait-for <селектор>     дождаться элемента перед измерением
-  --timeout <мс>            таймаут загрузки и ожидания (по умолчанию: 30000)
+  --timeout <мс>            таймаут загрузки и ожидания (по умолчанию: ${DEFAULT_TIMEOUT_MS})
   --full-page               скриншот всей страницы, а не только окна
 `;
 
 function parseArgs(argv) {
-  const args = { urls: [], selectors: 'body', viewports: '1440x900,1024x768', out: 'measure-out', timeout: '30000' };
+  const args = { urls: [], selectors: 'body', viewports: DEFAULT_VIEWPORTS, out: 'measure-out', timeout: DEFAULT_TIMEOUT_MS };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--help' || a === '-h') args.help = true;
