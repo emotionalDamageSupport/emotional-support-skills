@@ -16,8 +16,7 @@ Copy this checklist and tick it off as you go:
 - [ ] 2. Branch prepared: target chosen, changes committed if asked
 - [ ] 3. Title written and check-title.sh says OK
 - [ ] 4. Description covers every behaviour change in the diff
-- [ ] 5. User confirmed (skip if only the text was asked for)
-- [ ] 6. Pushed, MR created or updated, URL reported
+- [ ] 5. Pushed, MR created or updated, URL reported
 ```
 
 ## 1. Collect context
@@ -35,7 +34,7 @@ The project's `issue-tracker.md` (printed by the script) wins over the defaults 
 - **Target**: the branch the user named; "в релизную" → the latest release branch from the script; "в родительскую" → "created from"; otherwise the script's target.
 - **On the target itself** (e.g. `main`) with changes: create a branch first — `<KEY>-<short-slug>`, or a short slug when there's no task.
 - **Uncommitted changes**: if the user asked to commit, stage files by name — a whole folder sweeps in local junk — show the file list and commit with a message in the title format. If they didn't ask, ask whether the changes belong in the MR.
-- **Behind the target**: if the user asked to pull ("подтяни main"), run the `pull-push` skill now with the target as its parent branch. Otherwise put "ветка отстаёт от `<target>` на N коммитов — подтянуть?" into the confirmation (step 5) and run `pull-push` on yes.
+- **Behind the target**: if the user asked to pull ("подтяни main"), run the `pull-push` skill now with the target as its parent branch. Otherwise publish the branch as it is and add "ветка отстаёт от `<target>` на N коммитов — подтянуть?" to the final reply; run `pull-push` on yes. Merging the target changes what the MR contains, so it stays the user's call.
 
 ## 3. Title
 
@@ -44,16 +43,16 @@ The project's `issue-tracker.md` (printed by the script) wins over the defaults 
 ```
 
 ```
-SHOP-412 SHOP-415 fix: [cart] дата доставки в итоге заказа и иконки товаров в подсказке «+N»
-feat: [ui-kit] ItemList принимает renderItem для элементов подсказки
-Draft: SHOP-77 fix: [cart] окно доставки до 00:00
+SHOP-412 SHOP-415 fix: [Cart] Дата доставки в итоге заказа и иконки товаров в подсказке «+N»
+feat: [UI-kit] ItemList принимает renderItem для элементов подсказки
+Draft: SHOP-77 fix: [Cart] Окно доставки до 00:00
 ```
 
 - **TASK-KEYS**: every task key, space-separated, from the branch name, commits and conversation. No task → the title starts with the type.
 - **type**: `feat`, `fix`, `refactor`, `perf`, `docs`, `chore`, `ci`, `build`, `deps`, `test`, with the colon right after it.
-- **[scope]**: optional, in square brackets after the colon. Release tooling parses whatever sits between the type and the colon, and anything but one ASCII word there silently skips the release.
+- **[scope]**: optional, in square brackets after the colon, starting with a capital letter (`[Cart]`, `[UI-kit]`). Release tooling parses whatever sits between the type and the colon, and anything but one ASCII word there silently skips the release.
 - A major/breaking release marker (`feat!`) only when the user explicitly asks for one — it cuts a major version. Describe a breaking change in Blast radius.
-- **summary**: what was done, in the description language, lowercase, no trailing period, ≤ 80 characters so MR lists show it whole.
+- **summary**: what was done, in the description language, starting with a capital letter, no trailing period, ≤ 80 characters so MR lists show it whole.
 - **Draft**: "драфт мр" means a GitLab/GitHub draft → prefix `Draft: `.
 - A release title regex in `issue-tracker.md` is binding: if several keys break it, keep the first in the title and list the rest at the top of the description.
 
@@ -109,15 +108,13 @@ Add `## Замечания` to the short form, and `## Зачем` / `## Зав�
 
 A filled-in example: [references/example.md](references/example.md) — read it only if unsure about the shape.
 
-## 5. Confirm
+## 5. Publish
 
 Only the text asked for → show it and stop.
 
-Otherwise show in one message: title, description, `source → target`, reviewers (when the user named them), and the "отстаёт — подтянуть?" question if relevant. Wait for an explicit OK: an MR is visible to the whole team.
+Otherwise publish straight away, without showing the title and description in chat first: the user reads them in the MR, and an MR is cheap to edit.
 
-## 6. Publish
-
-1. Push: `git push -u origin HEAD`, or `pull-push` if the user agreed to update the branch.
+1. Push with the `push` skill, or with `pull-push` when the branch is being updated (step 2). No `push` skill installed → `git push -u origin HEAD`; a rejected push stops the flow — report it, never force-push.
 2. An MR for this branch already exists → update it (see variations below) instead of creating a duplicate.
 3. Create it with the tool for the remote host the script printed:
    - **GitLab**: the GitLab MCP server's `create_merge_request` tool, else `glab mr create --title … --description "$(cat <file>)" --target-branch <target>`. `git push -o merge_request.create` carries only a one-line description — if it's the only option, set the real description right after.
@@ -126,7 +123,7 @@ Otherwise show in one message: title, description, `source → target`, reviewer
    - Options from `issue-tracker.md`: squash, remove source branch, assignee.
 4. **Reviewers**, when the user named them: resolve via the team table in `issue-tracker.md`; a name missing there → one member lookup with `per_page=100` (smaller pages miss people), then ask if still ambiguous.
 5. Merging is a separate request — leave the MR open.
-6. Reply with the MR URL. Target was a release branch → add one question: "сделать такой же MR в main?" (a hotfix usually has to reach main too).
+6. Reply in one or two lines: the MR URL, plus the "отстаёт — подтянуть?" question when the branch is behind. Target was a release branch → add one question: "сделать такой же MR в main?" (a hotfix usually has to reach main too).
 
 ## Variations
 

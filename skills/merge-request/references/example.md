@@ -5,7 +5,7 @@ A two-task MR in Russian, with a tracker URL pattern from `issue-tracker.md` (`h
 **Title**
 
 ```
-SHOP-412 SHOP-415 fix: [cart] дата доставки в итоге заказа и иконки товаров в подсказке «+N»
+SHOP-412 SHOP-415 fix: [Cart] Дата доставки в итоге заказа и иконки товаров в подсказке «+N»
 ```
 
 **Description**

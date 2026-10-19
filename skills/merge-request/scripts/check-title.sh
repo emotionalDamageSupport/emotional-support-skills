@@ -33,6 +33,12 @@ summary_len="$(perl -CSA -e 'print length($ARGV[0])' -- "$summary")"
 [ "$summary_len" -gt 80 ] && problems+=("summary is $summary_len chars; aim for ≤ 80")
 [ "${summary%.}" != "$summary" ] && problems+=("summary ends with a period")
 
+# Scope and summary start with a capital letter (Cyrillic too, hence -CSA and \p{Lu}).
+scope="$(printf '%s' "$core" | sed -nE 's/^([A-Z][A-Z0-9]+-[0-9]+ )*[a-z]+!?: \[([^]]*)\] .*/\2/p')"
+starts_upper() { perl -CSA -e 'exit(($ARGV[0] =~ /^\p{Lu}/) ? 0 : 1)' -- "$1"; }
+[ -n "$scope" ] && ! starts_upper "$scope" && problems+=("scope [$scope] starts with a lowercase letter — capitalise it")
+[ -n "$summary" ] && ! starts_upper "$summary" && problems+=("summary starts with a lowercase letter — capitalise it")
+
 if [ -n "$release_re" ]; then
   perl -e 'exit(($ARGV[0] =~ /$ARGV[1]/) ? 0 : 1)' -- "$core" "$release_re" \
     || problems+=("does not match the release regex: $release_re (with several task keys, keep the first in the title and list the rest in the description)")
