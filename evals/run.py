@@ -173,6 +173,11 @@ def setup(sid, root):
         git(work, "checkout", "-q", "SHOP-420-cart-total")
         ctx["branch"] = "SHOP-420-cart-total"
 
+    elif sid == "mr-from-main":
+        ctx["head"] = git(work, "rev-parse", "HEAD")
+        write(work, {"src/delivery.js": BASE_FILES["src/delivery.js"].replace("slice(0, 10)", "slice(0, 10).split('-').reverse().join('.')")})
+        ctx["branch"] = "main"
+
     elif sid == "pull-lockfile-conflict":
         git(work, "checkout", "-q", "-b", "SHOP-430-lock")
         commit(work, {"package-lock.json": lock("1.0.0", ',\n      "license": "MIT"')}, "chore: Lockfile license field")
@@ -316,6 +321,17 @@ def checks(sid, root, work, ctx, reply):
         add("pushed as is", remote_sha(root, branch) == ctx["head"])
         add("MR created", bool(creates))
         add("reply mentions behind", re.search(r"отста|behind", reply, re.I))
+        add("reply has MR URL", MR_URL in reply)
+
+    elif sid == "mr-from-main":
+        current = git(work, "branch", "--show-current")
+        add("new branch created", current and current != "main", current)
+        add("change committed on it", current != "main" and "src/delivery.js" in git(work, "diff", "--name-only", f"{ctx['head']}..HEAD").split())
+        add("main untouched", git(work, "rev-parse", "main") == ctx["head"] and remote_sha(root, "main") == ctx["head"])
+        add("branch pushed", current != "main" and remote_sha(root, current) == head)
+        t = arg(creates[0], "--title", "-t") if creates else ""
+        tgt = arg(creates[0], "--target-branch", "-b") if creates else ""
+        add("MR created into main", creates and title_ok(t) and tgt in ("", "main"), t)
         add("reply has MR URL", MR_URL in reply)
 
     elif sid == "pull-lockfile-conflict":

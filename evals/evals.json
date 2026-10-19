@@ -1,7 +1,9 @@
 [
   {
     "id": "mr-text-only",
-    "skills": ["merge-request"],
+    "skills": [
+      "merge-request"
+    ],
     "query": "подготовь заголовок и описание мр для текущей ветки, публиковать не надо",
     "files": "feature branch SHOP-412-delivery-date with one committed fix, not pushed",
     "expected_behavior": [
@@ -14,11 +16,14 @@
   },
   {
     "id": "mr-commit-and-create",
-    "skills": ["merge-request", "push"],
-    "query": "закоммить изменения и создай мр",
+    "skills": [
+      "merge-request",
+      "push"
+    ],
+    "query": "создай мр",
     "files": "branch SHOP-415-cart-icons with an uncommitted change in src/cart.js and untracked debug.log and .env.local",
     "expected_behavior": [
-      "One commit with src/cart.js only; debug.log and .env.local stay uncommitted",
+      "The uncommitted change is committed without asking: one commit with src/cart.js only; debug.log and .env.local stay uncommitted",
       "The commit message passes check-title.sh and has no attribution trailer",
       "The branch is pushed and the MR is created (glab) with a valid title, a Blast radius section and target main",
       "The reply is short: the MR URL and what was committed, without repeating the MR text"
@@ -26,7 +31,10 @@
   },
   {
     "id": "mr-behind-target",
-    "skills": ["merge-request", "push"],
+    "skills": [
+      "merge-request",
+      "push"
+    ],
     "query": "создай мр",
     "files": "branch SHOP-420-cart-total, committed, not pushed; main is 2 commits ahead",
     "expected_behavior": [
@@ -36,8 +44,24 @@
     ]
   },
   {
+    "id": "mr-from-main",
+    "skills": [
+      "merge-request",
+      "push"
+    ],
+    "query": "создай мр",
+    "files": "on main with an uncommitted change in src/delivery.js",
+    "expected_behavior": [
+      "A new branch is created and the change is committed there; main stays where it was, locally and on the remote",
+      "The new branch is pushed and the MR is created from it into main",
+      "The reply has the MR URL"
+    ]
+  },
+  {
     "id": "pull-lockfile-conflict",
-    "skills": ["pull"],
+    "skills": [
+      "pull"
+    ],
     "query": "подтяни main, не пушь",
     "files": "branch SHOP-430-lock and main both changed package-lock.json; main bumped the version to 1.1.0",
     "expected_behavior": [
@@ -49,7 +73,9 @@
   },
   {
     "id": "pull-dirty-tree",
-    "skills": ["pull"],
+    "skills": [
+      "pull"
+    ],
     "query": "подтяни main, не пушь",
     "files": "branch behind main with an uncommitted change in src/cart.js",
     "expected_behavior": [
@@ -59,7 +85,9 @@
   },
   {
     "id": "pull-code-conflict",
-    "skills": ["pull"],
+    "skills": [
+      "pull"
+    ],
     "query": "обнови ветку из main, пушить не надо",
     "files": "branch and main changed the same line of src/delivery.js",
     "expected_behavior": [
@@ -70,7 +98,9 @@
   },
   {
     "id": "pullpush-happy",
-    "skills": ["pull-push"],
+    "skills": [
+      "pull-push"
+    ],
     "query": "спулься",
     "files": "pushed branch, main 1 commit ahead without conflicts",
     "expected_behavior": [
@@ -81,7 +111,9 @@
   },
   {
     "id": "pullpush-remote-moved",
-    "skills": ["pull-push"],
+    "skills": [
+      "pull-push"
+    ],
     "query": "подтяни main и запушь",
     "files": "a colleague pushed a commit to the remote branch; main is ahead",
     "expected_behavior": [
@@ -91,7 +123,9 @@
   },
   {
     "id": "pullpush-dirty-tree",
-    "skills": ["pull-push"],
+    "skills": [
+      "pull-push"
+    ],
     "query": "спулься",
     "files": "branch behind main with an uncommitted change in src/cart.js",
     "expected_behavior": [
@@ -101,7 +135,9 @@
   },
   {
     "id": "push-first-push",
-    "skills": ["push"],
+    "skills": [
+      "push"
+    ],
     "query": "запушь ветку",
     "files": "new branch SHOP-440-copy-link with one commit, no upstream",
     "expected_behavior": [
@@ -111,7 +147,9 @@
   },
   {
     "id": "push-remote-moved",
-    "skills": ["push"],
+    "skills": [
+      "push"
+    ],
     "query": "запушь",
     "files": "a colleague pushed a commit to the remote branch; the local branch has its own new commit",
     "expected_behavior": [
@@ -122,7 +160,9 @@
   },
   {
     "id": "push-on-target",
-    "skills": ["push"],
+    "skills": [
+      "push"
+    ],
     "query": "запушь",
     "files": "on main with a local commit",
     "expected_behavior": [
