@@ -1,6 +1,6 @@
 ---
 name: merge-request
-description: Merge request (GitLab MR / GitHub PR) for the current branch, with a fixed-format title and a blast-radius description. Use when the user asks to create or open one ("создай мр", "open a PR"), to commit and then open one ("закоммить и создай мр"), to update an existing one's description ("обнови описание мр"), or only for its title and description text.
+description: Merge request (GitLab MR / GitHub PR) for the current work — commits pending changes, creates the branch if needed, pushes, and opens the MR right away with a fixed-format title and a blast-radius description. Use when the user asks to create or open one ("создай мр", "open a PR"), to commit and then open one ("закоммить и создай мр"), to update an existing one's description ("обнови описание мр"), or only for its title and description text.
 ---
 
 # Merge request
@@ -13,7 +13,7 @@ Copy this checklist and tick it off as you go:
 
 ```
 - [ ] 1. Context collected (context.sh) and the diff read
-- [ ] 2. Branch prepared: target chosen, changes committed if asked
+- [ ] 2. Branch prepared: target chosen, branch created if needed, uncommitted changes committed
 - [ ] 3. Title written and check-title.sh says OK
 - [ ] 4. Description covers every behaviour change in the diff
 - [ ] 5. Pushed, MR created or updated, URL reported
@@ -32,8 +32,8 @@ The project's `issue-tracker.md` (printed by the script) wins over the defaults 
 ## 2. Prepare the branch
 
 - **Target**: the branch the user named; "в релизную" → the latest release branch from the script; "в родительскую" → "created from"; otherwise the script's target.
-- **On the target itself** (e.g. `main`) with changes: create a branch first — `<KEY>-<short-slug>`, or a short slug when there's no task.
-- **Uncommitted changes**: if the user asked to commit, stage files by name — a whole folder sweeps in local junk — show the file list and commit with a message in the title format. If they didn't ask, ask whether the changes belong in the MR.
+- **On the target itself** (e.g. `main`) with changes: create a branch first — `<KEY>-<short-slug>`, or a short slug when there's no task — and switch to it; the commit goes there.
+- **Uncommitted changes**: commit them without asking — a request for an MR covers the work in the tree. Stage files by name, not a whole folder; leave local junk out (logs, `.env*` files, build output, editor and OS files) and name it in the final reply. The commit message follows the title format (step 3).
 - **Behind the target**: if the user asked to pull ("подтяни main"), run the `pull-push` skill now with the target as its parent branch. Otherwise publish the branch as it is and add "ветка отстаёт от `<target>` на N коммитов — подтянуть?" to the final reply; run `pull-push` on yes. Merging the target changes what the MR contains, so it stays the user's call.
 
 ## 3. Title
@@ -123,7 +123,7 @@ Otherwise publish straight away, without showing the title and description in ch
    - Options from `issue-tracker.md`: squash, remove source branch, assignee.
 4. **Reviewers**, when the user named them: resolve via the team table in `issue-tracker.md`; a name missing there → one member lookup with `per_page=100` (smaller pages miss people), then ask if still ambiguous.
 5. Merging is a separate request — leave the MR open.
-6. Reply in one or two lines: the MR URL, plus the "отстаёт — подтянуть?" question when the branch is behind. Target was a release branch → add one question: "сделать такой же MR в main?" (a hotfix usually has to reach main too).
+6. Reply in one or two lines: the MR URL, the files left out of the commit if any, and the "отстаёт — подтянуть?" question when the branch is behind. The title, description, checks and decisions live in the MR, so the reply carries nothing else. Target was a release branch → add one question: "сделать такой же MR в main?" (a hotfix usually has to reach main too).
 
 ## Variations
 

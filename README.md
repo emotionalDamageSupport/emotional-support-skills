@@ -6,7 +6,7 @@ Agent skills for the chores that cause emotional damage. Plain [Agent Skills](ht
 
 | Skill | What it does |
 |---|---|
-| [`merge-request`](skills/merge-request/SKILL.md) | Commits if asked, then pushes and opens a GitLab MR / GitHub PR straight away, replying with its URL: `<TASK-KEYS> <type>: [Scope] <Summary>` title (scope and summary capitalised), a short description with links to tasks and sources, and a **Blast radius** section at the end. Offers `pull-push` when the branch is behind. |
+| [`merge-request`](skills/merge-request/SKILL.md) | Commits pending changes, creates the branch if needed, pushes and opens a GitLab MR / GitHub PR straight away, replying with its URL: `<TASK-KEYS> <type>: [Scope] <Summary>` title (scope and summary capitalised), a short description with links to tasks and sources, and a **Blast radius** section at the end. Offers `pull-push` when the branch is behind. |
 | [`pull`](skills/pull/SKILL.md) | Merges the parent branch (main, release, or the branch it was cut from), resolves lockfile conflicts, then installs dependencies with the repo's Node version and package manager. |
 | [`pull-push`](skills/pull-push/SKILL.md) | `pull` and then `git push` in one go, no intermediate confirmations. Used by `merge-request` when you ask to update the branch. |
 | [`push`](skills/push/SKILL.md) | Pushes the current branch: sets the upstream on first push, never force-pushes, stops when the remote branch has moved. Used by `merge-request`. |
