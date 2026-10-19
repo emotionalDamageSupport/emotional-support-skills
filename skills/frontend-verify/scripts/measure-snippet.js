@@ -30,6 +30,7 @@ function measureUi(selectors, options) {
       tag: el.tagName.toLowerCase(),
       id: el.id || undefined,
       classes: el.className && typeof el.className === 'string' ? el.className : undefined,
+      // 80 символов хватает, чтобы узнать элемент в отчёте, и не раздувают вывод.
       text: (el.innerText || el.value || '').trim().slice(0, 80) || undefined,
       rect: { x: round(r.x), y: round(r.y), width: round(r.width), height: round(r.height), right: round(r.right), bottom: round(r.bottom) },
       visible: r.width > 0 && r.height > 0 && cs.visibility !== 'hidden' && cs.display !== 'none',

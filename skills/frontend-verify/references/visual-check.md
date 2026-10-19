@@ -16,10 +16,10 @@
 
 ## Инструменты измерения
 
-- [`../scripts/measure.mjs`](../scripts/measure.mjs) — один вызов на все страницы и ширины: замеры, скриншоты окна и крупного плана, ошибки консоли и неуспешные запросы. В консоль — по строке на страницу и ширину, подробности в файлах:
+- [`../scripts/measure.mjs`](../scripts/measure.mjs) — один вызов на все страницы и ширины: замеры, скриншоты окна и крупного плана, ошибки консоли и неуспешные запросы. Нужен Playwright из проекта или глобальный; его нет — используй `measure-snippet.js` ниже. В консоль — по строке на страницу и ширину, подробности в файлах:
 
   ```bash
-  node <skill>/scripts/measure.mjs \
+  node <frontend-verify directory>/scripts/measure.mjs \
     --url ru=http://localhost:3000/settings --url en='http://localhost:3000/settings?lang=en' \
     --selectors ".form,.field,textarea" --shot-selector ".form" \
     --viewports 1440x900,768x900 --out /tmp/measure

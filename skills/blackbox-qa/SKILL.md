@@ -1,6 +1,6 @@
 ---
 name: blackbox-qa
-description: "Black-box QA фичи по требованиям: проверка через публичные API и UI в выбранной вами среде, QA-отчёт с доказательствами и вердиктом."
+description: "Black-box QA фичи по требованиям: проверка через публичные API и UI в среде, выбранной пользователем, QA-отчёт с доказательствами и вердиктом. Для проверки перед релизом и перепроверки исправления после выкладки."
 argument-hint: "<требования> <среда и URL> [доступы, таймбокс]"
 disable-model-invocation: true
 ---
@@ -59,10 +59,10 @@ disable-model-invocation: true
 | Внешний эффект (письма, платежи, рассылки, вебхуки) | только в подтверждённые заглушки | только с отдельным разрешением на этот эффект |
 | Разрушительная операция (reset, массовое удаление) | нельзя | нельзя |
 
-- **API-сценарии — пачкой, коротким скриптом**: один `.mjs` на группу требований с клиентом из [`scripts/qa-http.mjs`](scripts/qa-http.mjs); однотипные проверки (границы, роли, форматы) — циклом:
+- **API-сценарии — пачкой, коротким скриптом**: один `.mjs` на группу требований с клиентом из [`scripts/qa-http.mjs`](scripts/qa-http.mjs); однотипные проверки (границы, роли, форматы) — циклом. Нужен Node 18+ (встроенный `fetch`), других зависимостей нет:
 
   ```js
-  import { createClient } from '<skill>/scripts/qa-http.mjs';
+  import { createClient } from "<this skill's directory>/scripts/qa-http.mjs";
   const qa = createClient({ baseUrl, headers: { 'X-Tenant': 'qa' }, auth: { admin: 'Bearer ${QA_ADMIN}' }, log: '<evidence>/api-log.jsonl' });
   const create = (id, as, body) => qa.call(id, { as, method: 'POST', path: '/api/items', json: { ...valid, ...body } });
   for (const d of [0, 1, 90, 91]) await create(`R4.d${d}`, 'admin', { code: `QA${run}D${d}`, discount: d });
