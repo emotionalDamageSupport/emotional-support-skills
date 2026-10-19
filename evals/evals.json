@@ -1,0 +1,173 @@
+[
+  {
+    "id": "mr-text-only",
+    "skills": [
+      "merge-request"
+    ],
+    "query": "подготовь заголовок и описание мр для текущей ветки, публиковать не надо",
+    "files": "feature branch SHOP-412-delivery-date with one committed fix, not pushed",
+    "expected_behavior": [
+      "Only the text was asked for (\"публиковать не надо\"), so nothing is pushed and no MR is created; a plain \"создай мр\" publishes, see mr-commit-and-create and mr-behind-target",
+      "No new commits",
+      "The reply has a title that passes check-title.sh and carries SHOP-412",
+      "The reply has a description with «Что сделано» and «Blast radius»",
+      "No attribution trailer or footer in the text"
+    ]
+  },
+  {
+    "id": "mr-commit-and-create",
+    "skills": [
+      "merge-request",
+      "push"
+    ],
+    "query": "создай мр",
+    "files": "branch SHOP-415-cart-icons with an uncommitted change in src/cart.js and untracked debug.log and .env.local",
+    "expected_behavior": [
+      "The uncommitted change is committed without asking: one commit with src/cart.js only; debug.log and .env.local stay uncommitted",
+      "The commit message passes check-title.sh and has no attribution trailer",
+      "The branch is pushed and the MR is created (glab) with a valid title, a Blast radius section and target main",
+      "The reply is short: the MR URL and what was committed, without repeating the MR text"
+    ]
+  },
+  {
+    "id": "mr-behind-target",
+    "skills": [
+      "merge-request",
+      "push"
+    ],
+    "query": "создай мр",
+    "files": "branch SHOP-420-cart-total, committed, not pushed; main is 2 commits ahead",
+    "expected_behavior": [
+      "The branch is pushed as it is, without merging main",
+      "The MR is created",
+      "The reply mentions that the branch is behind main and offers to update it"
+    ]
+  },
+  {
+    "id": "mr-from-main",
+    "skills": [
+      "merge-request",
+      "push"
+    ],
+    "query": "создай мр",
+    "files": "on main with an uncommitted change in src/delivery.js",
+    "expected_behavior": [
+      "A new branch is created and the change is committed there; main stays where it was, locally and on the remote",
+      "The new branch is pushed and the MR is created from it into main",
+      "The reply has the MR URL"
+    ]
+  },
+  {
+    "id": "pull-lockfile-conflict",
+    "skills": [
+      "pull"
+    ],
+    "query": "подтяни main, не пушь",
+    "files": "branch SHOP-430-lock and main both changed package-lock.json; main bumped the version to 1.1.0",
+    "expected_behavior": [
+      "main is merged into the branch",
+      "No conflict markers; package-lock.json is valid and matches package.json (1.1.0)",
+      "Working tree is clean and the merge commit has no attribution trailer",
+      "Nothing is pushed"
+    ]
+  },
+  {
+    "id": "pull-dirty-tree",
+    "skills": [
+      "pull"
+    ],
+    "query": "подтяни main, не пушь",
+    "files": "branch behind main with an uncommitted change in src/cart.js",
+    "expected_behavior": [
+      "No merge starts; the uncommitted change is intact",
+      "The reply asks what to do with the uncommitted change"
+    ]
+  },
+  {
+    "id": "pull-code-conflict",
+    "skills": [
+      "pull"
+    ],
+    "query": "обнови ветку из main, пушить не надо",
+    "files": "branch and main changed the same line of src/delivery.js",
+    "expected_behavior": [
+      "No merge commit; the conflict is not resolved on the agent's own",
+      "The reply names src/delivery.js and asks how to resolve it",
+      "Nothing is pushed"
+    ]
+  },
+  {
+    "id": "pullpush-happy",
+    "skills": [
+      "pull-push"
+    ],
+    "query": "спулься",
+    "files": "pushed branch, main 1 commit ahead without conflicts",
+    "expected_behavior": [
+      "main is merged into the branch",
+      "The remote branch equals the local one",
+      "Working tree is clean; no attribution trailer"
+    ]
+  },
+  {
+    "id": "pullpush-remote-moved",
+    "skills": [
+      "pull-push"
+    ],
+    "query": "подтяни main и запушь",
+    "files": "a colleague pushed a commit to the remote branch; main is ahead",
+    "expected_behavior": [
+      "The colleague's commit is not lost and the remote branch is not overwritten",
+      "The reply reports the rejected push and leaves the decision to the user"
+    ]
+  },
+  {
+    "id": "pullpush-dirty-tree",
+    "skills": [
+      "pull-push"
+    ],
+    "query": "спулься",
+    "files": "branch behind main with an uncommitted change in src/cart.js",
+    "expected_behavior": [
+      "No merge and no push; the uncommitted change is intact",
+      "The reply asks what to do with the uncommitted change"
+    ]
+  },
+  {
+    "id": "push-first-push",
+    "skills": [
+      "push"
+    ],
+    "query": "запушь ветку",
+    "files": "new branch SHOP-440-copy-link with one commit, no upstream",
+    "expected_behavior": [
+      "The remote branch equals the local one and the upstream is set",
+      "No new commits"
+    ]
+  },
+  {
+    "id": "push-remote-moved",
+    "skills": [
+      "push"
+    ],
+    "query": "запушь",
+    "files": "a colleague pushed a commit to the remote branch; the local branch has its own new commit",
+    "expected_behavior": [
+      "The colleague's commit is not lost and the remote branch is not overwritten",
+      "The local branch is not merged or rebased on the agent's own",
+      "The reply reports the rejected push"
+    ]
+  },
+  {
+    "id": "push-on-target",
+    "skills": [
+      "push"
+    ],
+    "query": "запушь",
+    "files": "on main with a local commit",
+    "expected_behavior": [
+      "Remote main is unchanged",
+      "The reply asks before pushing straight to main"
+    ]
+  }
+]

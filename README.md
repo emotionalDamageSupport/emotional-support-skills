@@ -96,6 +96,7 @@ skills/<name>/SKILL.md       # one folder per skill, flat
 skills/<name>/references/    # loaded only when the skill points to them
 .claude-plugin/              # plugin + marketplace manifests (Claude Code, Codex, Copilot)
 scripts/link-skills.sh       # local symlink install
+evals/                       # scenario tests for merge-request, pull, pull-push, push (see evals/README.md)
 ```
 
 Adding a skill: create `skills/<name>/SKILL.md` with `name` and `description` frontmatter (other fields aren't portable across agents; the only exceptions are Claude Code's `disable-model-invocation` and `argument-hint`, which other agents ignore), and add its path to `.claude-plugin/plugin.json`.
