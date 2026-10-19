@@ -17,15 +17,15 @@ expect() { # expect ok|fail "<title>" ["<release regex>"]
 }
 
 # Valid
-expect ok "SHOP-412 fix: [cart] дата доставки в итоге заказа"
-expect ok "SHOP-412 SHOP-415 fix: [cart] дата доставки и иконки в подсказке"
-expect ok "fix: [ui] перенос длинных названий в подсказке"
-expect ok "feat: новый компонент без скоупа"
-expect ok "Draft: SHOP-77 fix: [cart] окно доставки до 00:00"
-expect ok "SHOP-1 fix: [cart] x" "$RELEASE_RE"
+expect ok "SHOP-412 fix: [Cart] Дата доставки в итоге заказа"
+expect ok "SHOP-412 SHOP-415 fix: [Cart] Дата доставки и иконки в подсказке"
+expect ok "fix: [UI] Перенос длинных названий в подсказке"
+expect ok "feat: Новый компонент без скоупа"
+expect ok "Draft: SHOP-77 fix: [Cart] Окно доставки до 00:00"
+expect ok "SHOP-1 fix: [Cart] X" "$RELEASE_RE"
 
 # Cyrillic summary of 79 chars passes even in the C locale (bytes ≠ characters)
-LC_ALL=C expect ok "fix: [ui] $(printf 'я%.0s' $(seq 1 79))"
+LC_ALL=C expect ok "fix: [UI] $(printf 'Я%.0s' $(seq 1 79))"
 
 # Invalid
 expect fail "SHOP-1 fix(cart): scope in parentheses"
@@ -33,9 +33,14 @@ expect fail "SHOP-1 feat!: breaking marker"
 expect fail "SHOP-1, SHOP-2: commas and no type"
 expect fail "SHOP-1: no type"
 expect fail "Wrap long item names in hint"
-expect fail "fix: [ui] trailing period."
-expect fail "fix: [ui] $(printf 'я%.0s' $(seq 1 81))"
-expect fail "SHOP-1 SHOP-2 fix: [cart] two keys break the release regex" "$RELEASE_RE"
+expect fail "fix: [UI] Trailing period."
+expect fail "fix: [UI] $(printf 'Я%.0s' $(seq 1 81))"
+expect fail "SHOP-1 SHOP-2 fix: [Cart] Two keys break the release regex" "$RELEASE_RE"
+expect fail "SHOP-1 fix: [cart] Scope in lowercase"
+expect fail "SHOP-1 fix: [Cart] summary in lowercase"
+expect fail "feat: новый компонент без скоупа"
+LC_ALL=C expect fail "fix: [Корзина] дата доставки"
+LC_ALL=C expect ok "fix: [Корзина] Дата доставки"
 
 [ $failed -eq 0 ] && echo "OK: check-title tests passed"
 exit $failed

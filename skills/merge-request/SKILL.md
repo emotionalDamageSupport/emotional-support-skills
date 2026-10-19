@@ -43,16 +43,16 @@ The project's `issue-tracker.md` (printed by the script) wins over the defaults 
 ```
 
 ```
-SHOP-412 SHOP-415 fix: [cart] дата доставки в итоге заказа и иконки товаров в подсказке «+N»
-feat: [ui-kit] ItemList принимает renderItem для элементов подсказки
-Draft: SHOP-77 fix: [cart] окно доставки до 00:00
+SHOP-412 SHOP-415 fix: [Cart] Дата доставки в итоге заказа и иконки товаров в подсказке «+N»
+feat: [UI-kit] ItemList принимает renderItem для элементов подсказки
+Draft: SHOP-77 fix: [Cart] Окно доставки до 00:00
 ```
 
 - **TASK-KEYS**: every task key, space-separated, from the branch name, commits and conversation. No task → the title starts with the type.
 - **type**: `feat`, `fix`, `refactor`, `perf`, `docs`, `chore`, `ci`, `build`, `deps`, `test`, with the colon right after it.
-- **[scope]**: optional, in square brackets after the colon. Release tooling parses whatever sits between the type and the colon, and anything but one ASCII word there silently skips the release.
+- **[scope]**: optional, in square brackets after the colon, starting with a capital letter (`[Cart]`, `[UI-kit]`). Release tooling parses whatever sits between the type and the colon, and anything but one ASCII word there silently skips the release.
 - A major/breaking release marker (`feat!`) only when the user explicitly asks for one — it cuts a major version. Describe a breaking change in Blast radius.
-- **summary**: what was done, in the description language, lowercase, no trailing period, ≤ 80 characters so MR lists show it whole.
+- **summary**: what was done, in the description language, starting with a capital letter, no trailing period, ≤ 80 characters so MR lists show it whole.
 - **Draft**: "драфт мр" means a GitLab/GitHub draft → prefix `Draft: `.
 - A release title regex in `issue-tracker.md` is binding: if several keys break it, keep the first in the title and list the rest at the top of the description.
 
