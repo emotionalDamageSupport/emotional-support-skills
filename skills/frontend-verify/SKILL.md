@@ -1,87 +1,87 @@
 ---
 name: frontend-verify
-description: "Фронтенд по эталону: эталон до правок, после — проверка в браузере (сценарий, консоль, вёрстка, тексты и переводы) и исправление найденного. Для новых экранов и заметных изменений фронта, а также по просьбе «проверь фронт»."
-argument-hint: "<задача или изменение для проверки>"
+description: "Frontend work against a reference: picks the design reference before editing, then checks the result in a browser (scenario, console, layout, texts and translations) and fixes what it finds. For new screens and noticeable frontend changes, and on a request to check the frontend."
+argument-hint: "<task or change to check>"
 disable-model-invocation: true
 ---
 
-# Frontend: эталон → реализация → проверка
+# Frontend: reference → implementation → check
 
-Скилл вызывают в начале задачи — тогда эталон выбирается до первой правки — или по готовому изменению: тогда это проверка с доводкой до эталона (шаги 1, 2, 4–7). Итоговая проверка всегда идёт после последней записи и форматирования. Одной строкой сообщи пользователю, какой эталон выбран.
+The skill is invoked at the start of a task — then the reference is chosen before the first edit — or on a finished change: then it is a check that brings the change up to the reference (steps 1, 2, 4–7). The final check always comes after the last write and formatting. Tell the user in one line which reference you chose.
 
-**Автономный режим** — пользователь велел не ждать его ответа. Тогда каждое «согласуй» и «спроси» ниже превращается в «выбери вариант по умолчанию и запиши в «Решения» с причиной»: вариант указан в правиле, а где не указан — ближайший к дизайн-системе. Работа продолжается.
+**Autonomous mode** — the user said not to wait for answers. Then every "agree" and "ask" below becomes "pick the default and record it under «Decisions» with the reason": the default is named in the rule, and where it isn't, take the option closest to the design system. Work goes on.
 
-Скопируй чек-лист и отмечай по ходу:
+Copy this checklist and tick it off as you go:
 
 ```
-- [ ] 1. Подготовка: инструкции проекта, команды, исходный git status
-- [ ] 2. Эталон и тексты зафиксированы до правок; для готового изменения сохранён замер «до» из браузера
-- [ ] 3. Реализация в границах фичи; спорные значения согласованы или занесены в «Решения»
-- [ ] 4. Проверки кода пройдены, форматирование сделано, чужие файлы не задеты
-- [ ] 5. После последней записи: перезагрузка, сценарий, консоль и запросы
-- [ ] 6. Визуальная сверка по references/visual-check.md
-- [ ] 7. Результат
+- [ ] 1. Setup: project instructions, commands, initial git status
+- [ ] 2. Reference and texts fixed before editing; for a finished change, a "before" measurement from the browser saved
+- [ ] 3. Implementation within the feature; disputed values agreed or recorded under «Decisions»
+- [ ] 4. Code checks passed, formatting done, other files untouched
+- [ ] 5. After the last write: reload, scenario, console and requests
+- [ ] 6. Visual check per references/visual-check.md
+- [ ] 7. Result
 ```
 
-## 1. Подготовка
+## 1. Setup
 
-Найди рабочий checkout (или worktree, в котором идёт работа) и его инструкции: `AGENTS.md`, `CLAUDE.md`, README, `Makefile`, scripts в `package.json`. Они — источник правды о том, как проект линтится, тестируется, форматируется и запускается, о его дизайн-системе, локалях и поддерживаемых ширинах. Найди команды для ролей и запомни подвохи:
+Find the working checkout (or the worktree the work happens in) and its instructions: `AGENTS.md`, `CLAUDE.md`, README, `Makefile`, the scripts in `package.json`. They are the source of truth on how the project is linted, tested, formatted and run, on its design system, locales and supported widths. Find the command for each role and keep the gotchas in mind:
 
-- **lint и проверка типов** — обязательны перед сдачей, если проект их требует;
-- **тесты по изменённым файлам** — «тестов не найдено» означает «нет покрытия», а не «прошли»;
-- **форматтер** — обычно правит и файлы вне твоего изменения (см. шаг 4);
-- **dev server для затронутой точки входа** — фактический URL бери из его вывода; он может проксировать API на внешний backend.
+- **lint and type checks** — required before handing over, if the project requires them;
+- **tests for the changed files** — "no tests found" means "no coverage", not "passed";
+- **formatter** — usually rewrites files outside your change too (see step 4);
+- **dev server for the affected entry point** — take the actual URL from its output; it may proxy the API to an external backend.
 
-Запиши исходный `git status`, чтобы отличать изменения пользователя от своих. Зависимости, сброс окружения и setup-команды оставь как есть; если без них никак — объясни установленную причину и спроси разрешения. Storybook и подобные инструменты — только по прямой просьбе.
+Record the initial `git status` to tell the user's changes from yours. Leave dependencies, environment resets and setup commands as they are; if you can't do without them, explain the established reason and ask for permission. Storybook and similar tools only on a direct request.
 
-## 2. Эталон и тексты — до правок
+## 2. Reference and texts — before editing
 
-**Эталон.** Есть макет от пользователя — он и есть эталон. Иначе найди существующий экран или компонент проекта того же типа (форма, таблица, модальное окно, панель, карточка), изучи его код и вид в приложении. Проверяешь уже готовые изменения — эталон тоже сначала, и до правок замерь исходное состояние в браузере: эти значения — доказательство найденных расхождений. Отступы, ширины, размеры и правила flex/grid бери из эталона через общие компоненты и токены дизайн-системы проекта. Отклонения — только по требованиям задачи и с объяснением; явные дефекты аналога не копируй. Аналога нет или источники противоречат → спроси только недостающие дизайн-решения и продолжай независимую работу.
+**Reference.** The user gave a mockup → that's the reference. Otherwise find an existing screen or component of the same kind in the project (form, table, modal, panel, card) and study its code and how it looks in the app. Checking a finished change → the reference comes first too, and before editing measure the current state in the browser: those values are the evidence for the deviations you find. Take spacing, widths, sizes and flex/grid rules from the reference through the project's shared components and design-system tokens. Deviate only where the task requires it, and explain; don't copy obvious defects of the reference. No reference exists or the sources contradict each other → ask only for the missing design decisions and continue the independent work.
 
-**Тексты.** Собери названия блоков, полей, кнопок, подсказки и сообщения из макета и документации задачи. Выводи их дословно: синоним меняет терминологию. Описание бизнес-логики помогает выбрать термин, но само не обязательно является UI-текстом. Макет и документация расходятся → покажи пользователю обе версии с точными местами; следуй приоритету, который он уже выбрал, иначе согласуй текст до финальной фиксации (в автономном режиме — источник, задающий именно UI-текст, обычно макет). Свою формулировку пиши, только если ни один источник не задаёт текст элемента: терминология приложения и существующие ключи переводов. Другие локали сохраняют смысл и термины источника.
+**Texts.** Collect block titles, field labels, button labels, hints and messages from the mockup and the task's documentation. Use them verbatim: a synonym changes the terminology. A business-logic description helps pick a term but isn't necessarily UI text itself. The mockup and the docs disagree → show the user both versions with exact locations; follow the priority they already chose, otherwise agree on the text before fixing it (in autonomous mode, the source that defines UI text specifically, usually the mockup). Write your own wording only when no source defines the element's text: use the app's terminology and existing translation keys. Other locales keep the source's meaning and terms.
 
-## 3. Реализация
+## 3. Implementation
 
-- В границах фичи доводи реализацию до макета. Стандартные компоненты дизайн-системы — со штатным оформлением и размерами, без отдельных согласований.
-- **Спорное значение** — нет стандартного компонента, а отступ или размер выпадает из сетки (например, нечётный). Сначала проверь токены и аналоги: нечётность сама по себе не ошибка. Сомнение осталось → покажи пользователю участок, значение из макета и вариант по дизайн-системе; согласуй до реализации этого значения, независимые части продолжай (в автономном режиме — вариант дизайн-системы). Молча скопированное или округлённое значение — то, что это правило предотвращает.
-- **Границы**: расхождения других элементов страницы с макетом описывай (элемент, ожидаемый и фактический вид, где видно, скриншот), но не исправляй без поручения — та же страница scope не расширяет. Регрессию, вызванную твоим изменением, исправляй.
-- Тесты без запроса добавляй только для существенных расчётов, преобразований и валидации; тесты на разметку и отображение состояний — по запросу.
+- Within the feature, bring the implementation up to the mockup. Standard design-system components keep their standard styling and sizes without separate agreement.
+- **Disputed value** — there's no standard component, and a spacing or size falls off the grid (an odd value, say). Check tokens and similar screens first: being odd isn't an error by itself. Still in doubt → show the user the spot, the mockup's value and the design-system option; agree before implementing that value and continue the independent parts (in autonomous mode, the design-system option). A value silently copied or rounded is exactly what this rule prevents.
+- **Boundaries**: describe deviations of other page elements from the mockup (element, expected and actual look, where it shows, a screenshot), but don't fix them without a request — the same page doesn't widen the scope. Fix a regression your change caused.
+- Add tests unasked only for substantial calculations, transformations and validation; tests for markup and display states on request.
 
-## 4. Проверки кода и финальные записи
+## 4. Code checks and final writes
 
-- Выполни обязательные проверки из инструкций проекта; после исправлений повтори только затронутые.
-- Форматтер — последней записью. Затем сравни `git status`/`git diff` с исходным: правки форматтера в файлах вне твоего изменения откати точечно (только его ханки), правки пользователя сохрани. Массовый reset/checkout уничтожит работу пользователя. Если форматтер изменил бы только файлы вне изменения, достаточно проверки в режиме check по тем же файлам — с отметкой в результате.
-- Любая запись после этого шага возвращает тебя к шагу 5 с перезагрузки.
+- Run the required checks from the project's instructions; after fixes, re-run only the affected ones.
+- The formatter is the last write. Then compare `git status`/`git diff` with the initial state: revert the formatter's edits in files outside your change one by one (its hunks only) and keep the user's edits. A bulk reset/checkout destroys the user's work. If the formatter would change only files outside your change, a check-mode run over the same files is enough — note it in the result.
+- Any write after this step takes you back to step 5, starting with a reload.
 
-## 5. Проверка в приложении
+## 5. Check in the app
 
-Переиспользуй запущенный dev server и вкладку, если они от этого checkout. Иначе запусти нужную точку входа и возьми фактический URL из вывода сервера; доступность backend проверь отдельно, секреты из env не выводи. Маршрут и условия доступа — из роутера и кода экрана. Данные — реальные; моки — только с явным указанием пользователю. Backend может быть внешним: создание, удаление и уведомления требуют разрешения; без него проверь шаги до записи и обозначь границу.
+Reuse the running dev server and tab if they belong to this checkout. Otherwise start the needed entry point and take the actual URL from the server's output; check the backend's availability separately and don't print secrets from env. Route and access conditions come from the router and the screen's code. Use real data; mocks only with an explicit note to the user. The backend may be external: creating, deleting and notifications need permission; without it, check the steps up to the write and mark the boundary.
 
-После последней записи:
+After the last write:
 
-1. Перезагрузи страницу и дождись нужного экрана.
-2. Пройди основной изменённый сценарий и доступные в данных крайние состояния. Форма — применимая валидация; интерактивное изменение — само взаимодействие, а не только наличие элемента.
-3. Прочитай консоль и неуспешные запросы; отдели новые ошибки от фоновых. Нет инструмента чтения консоли → так и напиши: «консоль не проверена».
-4. Покажи пользователю проверенный экран; скриншот — когда он помогает оценить изменение.
+1. Reload the page and wait for the right screen.
+2. Walk the main changed scenario and the edge states available in the data. A form → the applicable validation; an interactive change → the interaction itself, not just the element's presence.
+3. Read the console and failed requests; separate new errors from background ones. No tool for reading the console → say so: "console not checked".
+4. Show the user the checked screen; a screenshot when it helps judge the change.
 
-Сценарий, консоль и замеры собирай одним скриптом браузера за прогон, а не шаг за шагом. В скрипте — короткий таймаут по умолчанию (`page.setDefaultTimeout(5000)`) и `try/catch` на каждую проверку: отсутствующий элемент стоит секунды, а падение одной проверки не обрывает остальные. Вывод держи коротким: подробности — в файлы артефактов, в консоль — итог. Скриншоты сохраняй; открывай для просмотра крупный план затронутого блока, полный экран — только когда нужен общий вид.
+Collect the scenario, console and measurements in one browser script per run, not step by step. In the script, set a short default timeout (`page.setDefaultTimeout(5000)`) and a `try/catch` around each check: a missing element costs seconds, and one failed check doesn't cut off the rest. Keep the output short: details go to artifact files, the console gets the summary. Save screenshots; open the close-up of the affected block, and the full screen only when you need the overall view.
 
-Нет авторизации, backend или данных → выполни независимые проверки и назови непроверенный сценарий. Успешная компиляция визуальной проверкой не является.
+No authorization, backend or data → run the independent checks and name the scenario left unchecked. A successful build is not a visual check.
 
-## 6. Визуальная сверка
+## 6. Visual check
 
-Прочитай [references/visual-check.md](references/visual-check.md) и выполни его; замеры делай готовыми `scripts/measure.mjs` (все ширины и URL одним вызовом, скриншоты, консоль; нужен Playwright из проекта или глобальный) или `scripts/measure-snippet.js` (в открытой вкладке), а не новым скриптом. Расхождения в проверяемом изменении исправь — и в своём, и в готовом изменении, которое пользователь попросил проверить («проверь фронт» включает доводку до эталона); посторонние опиши отдельно. После исправлений и форматирования — снова шаг 5 и повтор затронутой сверки. Известное неисправленное расхождение в проверяемом изменении допустимо только с объяснённым ограничением.
+Read [references/visual-check.md](references/visual-check.md) and follow it; measure with the bundled `scripts/measure.mjs` (all widths and URLs in one run, screenshots, console; needs Playwright from the project or installed globally) or `scripts/measure-snippet.js` (inside an open tab), not with a new script. Fix the deviations in the change being checked — both your own and a finished change the user asked you to check (a request to check the frontend includes bringing it up to the reference); describe unrelated ones separately. After fixes and formatting, step 5 again and a repeat of the affected check. A known unfixed deviation in the change being checked is acceptable only with an explained limitation.
 
-## 7. Результат
+## 7. Result
 
-Задача завершена, когда все пункты чек-листа выполнены или помечены заблокированными с причиной, а последняя проверка в браузере была после последней записи в файлы. Сообщи кратко, по строке на пункт:
+The task is done when every checklist item is done or marked blocked with a reason, and the last browser check came after the last write to files. Report briefly, one line per item:
 
-- что изменилось;
-- какие проверки кода запущены и с каким итогом;
-- какие сценарии и состояния проверены в приложении;
-- эталон; размеры окна при сравнении; измеренные значения для спорных мест;
-- **Решения**: спорные значения и конфликты текстов — что выбрано и почему;
-- ограничения и непроверенное (нет эталона → соответствие дизайну не подтверждено); посторонние расхождения;
-- ссылку на вкладку или файл, если доступна.
+- what changed;
+- which code checks ran and their results;
+- which scenarios and states were checked in the app;
+- the reference; the window sizes used for comparison; measured values for disputed spots;
+- **Decisions**: disputed values and text conflicts — what was chosen and why;
+- limitations and what wasn't checked (no reference → design conformance not confirmed); unrelated deviations;
+- a link to the tab or file, if available.
 
-Чужой сервер оставь работать; свой временный процесс заверши, если он не нужен для просмотра результата.
+Leave someone else's server running; stop your own temporary process if it isn't needed to view the result.
