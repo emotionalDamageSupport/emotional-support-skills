@@ -21,7 +21,7 @@
       "One commit with src/cart.js only; debug.log and .env.local stay uncommitted",
       "The commit message passes check-title.sh and has no attribution trailer",
       "The branch is pushed and the MR is created (glab) with a valid title, a Blast radius section and target main",
-      "The reply has the MR URL and not the description text"
+      "The reply is short: the MR URL and what was committed, without repeating the MR text"
     ]
   },
   {

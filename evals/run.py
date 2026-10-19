@@ -307,7 +307,9 @@ def checks(sid, root, work, ctx, reply):
         add("MR description has Blast radius", "Blast radius" in d and not TRAILER.search(d))
         add("MR targets main", tgt in ("", "main"), tgt)
         add("reply has MR URL", MR_URL in reply)
-        add("description not in chat", "Что сделано" not in reply and "Blast radius" not in reply)
+        sections = re.search(r"Что сделано|Что проверить|Замечания|Blast radius", reply)
+        lines = [l for l in reply.splitlines() if l.strip()]
+        add("reply is short, MR text not repeated", not sections and len(lines) <= 6, f"{len(lines)} lines")
 
     elif sid == "mr-behind-target":
         add("branch not merged", head == ctx["head"])
