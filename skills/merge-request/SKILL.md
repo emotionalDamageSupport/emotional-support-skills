@@ -123,7 +123,12 @@ Otherwise publish straight away, without showing the title and description in ch
    - Options from `issue-tracker.md`: squash, remove source branch, assignee.
 4. **Reviewers**, when the user named them: resolve via the team table in `issue-tracker.md`; a name missing there → one member lookup with `per_page=100` (smaller pages miss people), then ask if still ambiguous.
 5. Merging is a separate request — leave the MR open.
-6. Reply in one or two lines: the MR URL, the files left out of the commit if any, and the "отстаёт — подтянуть?" question when the branch is behind. The title, description, checks and decisions live in the MR, so the reply carries nothing else. Target was a release branch → add one question: "сделать такой же MR в main?" (a hotfix usually has to reach main too).
+6. Reply in one or two lines: the MR URL, the files left out of the commit if any, and the "отстаёт — подтянуть?" question when the branch is behind. The title, description, checks and decisions live in the MR, so the reply carries nothing else. Target was a release branch → add one question: "сделать такой же MR в main?" (a hotfix usually has to reach main too). A typical reply:
+
+   ```
+   MR: https://gitlab.example.com/shop/web/-/merge_requests/101
+   Не попали в коммит: debug.log, .env.local
+   ```
 
 ## Variations
 

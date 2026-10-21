@@ -1,6 +1,6 @@
 {
   "name": "emotional-support-skills",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Agent skills for everyday engineering chores: merge requests with a blast radius, branch updates, black-box QA against requirements, and frontend checks in the browser.",
   "author": {
     "name": "emotionalDamageSupport",
