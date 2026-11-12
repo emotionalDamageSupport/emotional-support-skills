@@ -1,6 +1,6 @@
 # Example
 
-A two-task MR in Russian, with a tracker URL pattern from `issue-tracker.md` (`https://tracker.example.com/<KEY>`). The domain is made up; the shape is what matters.
+A two-task MR in Russian, with a tracker URL pattern from `issue-tracker.md` (`https://tracker.example.com/<KEY>`). Both tasks were read in the tracker: they share a parent story, SHOP-415 links an ui-kit task and a Figma frame. The domains are made up; the shape is what matters.
 
 **Title**
 
@@ -11,6 +11,11 @@ SHOP-412 SHOP-415 fix: [Cart] Дата доставки в итоге заказ
 **Description**
 
 ```markdown
+- **Задачи:** [SHOP-412 — Дата доставки на день раньше](https://tracker.example.com/SHOP-412), [SHOP-415 — Нет иконок в подсказке «+N»](https://tracker.example.com/SHOP-415)
+- **Стори:** [SHOP-400 — Новая корзина](https://tracker.example.com/SHOP-400)
+- **Связано:** [UIKIT-88 — renderItem в ItemList](https://tracker.example.com/UIKIT-88)
+- **Дизайн:** [Figma — Корзина, итог заказа](https://www.figma.com/design/AbC123/Cart?node-id=12-34)
+
 ## [SHOP-412](https://tracker.example.com/SHOP-412) — дата доставки на день раньше
 
 В итоге заказа дата доставки показывалась на день раньше (14 Oct вместо 15 Oct при окне доставки до 15 Oct, 00:00).
@@ -35,7 +40,7 @@ SHOP-412 SHOP-415 fix: [Cart] Дата доставки в итоге заказ
 
 ## Что не вошло
 
-- Поддержка `renderItem` в самом `ItemList` — отдельной задачей в ui-kit; после неё `CartItemsList` можно удалить.
+- Поддержка `renderItem` в самом `ItemList` — [UIKIT-88](https://tracker.example.com/UIKIT-88); после неё `CartItemsList` можно удалить.
 
 ## Что проверить
 

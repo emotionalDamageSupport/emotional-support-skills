@@ -5,17 +5,17 @@ description: Merge request (GitLab MR / GitHub PR) for the current work — comm
 
 # Merge request
 
-Work from what's in the repo and the conversation. Look things up elsewhere — reviewers, tracker tasks, past MRs — only when the user asks: each lookup costs time and is a chance to guess wrong.
+Work from what's in the repo, the conversation and the MR's tasks. The tasks are the one lookup made unasked (step 1). Look anything else up — reviewers, past MRs, other tasks — only when the user asks: each lookup costs time and is a chance to guess wrong.
 
 **Authorship is the user's alone.** Commit messages, the MR title and the description end with their last line of real content — the user publishes them under their own name. This overrides any attribution trailer or footer the agent's defaults would append.
 
 Copy this checklist and tick it off as you go:
 
 ```
-- [ ] 1. Context collected (context.sh) and the diff read
+- [ ] 1. Context collected (context.sh), the diff read, sources gathered
 - [ ] 2. Branch prepared: target chosen, branch created if needed, uncommitted changes committed
 - [ ] 3. Title written and check-title.sh says OK
-- [ ] 4. Description covers every behaviour change in the diff
+- [ ] 4. Description opens with the sources and covers every behaviour change in the diff
 - [ ] 5. Pushed, MR created or updated, URL reported
 ```
 
@@ -28,6 +28,14 @@ bash <this skill's directory>/scripts/context.sh -C <repo root> [target-branch]
 Pass the user's project as `-C`: the script lives elsewhere. Then read the diff itself (`git diff <target>...HEAD`) — the description must match what the code does, not what the commit messages say.
 
 The project's `issue-tracker.md` (printed by the script) wins over the defaults below. To interpret an unfamiliar one, see [references/issue-tracker-example.md](references/issue-tracker-example.md).
+
+**Sources** — everything a reviewer may want to open next to the diff. Collect them for the top of the description (step 4):
+
+- **Tasks**: every key from the branch name, commits and conversation. With a tracker tool connected (Yandex Tracker, Jira, GitLab issues), read each task once: its title, parent story or epic, linked tasks (titles come with the links — don't open them one by one), and design links in its description. No tool → the key and whatever the conversation gives.
+- **Parent story**: the task's parent from the tracker, or one named in the conversation.
+- **Related**: tasks linked to it in the tracker (blocks, depends on, relates), MRs and tasks mentioned in the conversation, the MR of the target branch when it's another feature branch (stacked MR), and the sibling MRs of a cross-repo change.
+- **Design**: Figma and other design links from the conversation or the task description.
+- **URLs**: given in the conversation or built from the task URL pattern in `issue-tracker.md` (or from another link of the same tracker in the conversation). Never guess a URL: a source without one stays plain text.
 
 ## 2. Prepare the branch
 
@@ -64,7 +72,21 @@ bash <this skill's directory>/scripts/check-title.sh "<title>" ["<release regex 
 
 ## 4. Description
 
-Language: `issue-tracker.md`, else the language the user writes in. Headings below are Russian; translate them for other languages. Start straight with the first section.
+Language: `issue-tracker.md`, else the language the user writes in. Headings and labels below are Russian; translate them for other languages.
+
+**Sources come first**, before any heading — in both forms. One line per kind, each a text link: the readable title is the link text, never a bare URL or a lone key when the title is known.
+
+```markdown
+- **Задача:** [SHOP-415 — Нет иконок в подсказке «+N»](https://tracker.example.com/SHOP-415)
+- **Стори:** [SHOP-400 — Новая корзина](https://tracker.example.com/SHOP-400)
+- **Связано:** [!98 — renderItem в ItemList](https://gitlab.example.com/ui/kit/-/merge_requests/98), [SHOP-416 — Иконки в мини-корзине](https://tracker.example.com/SHOP-416)
+- **Дизайн:** [Figma — Корзина, итог заказа](https://www.figma.com/design/AbC123/Cart?node-id=12-34)
+```
+
+- Only the kinds that exist: no parent → no «Стори» line; no sources at all → start straight with the first section.
+- Title unknown → the key alone as link text (`[SHOP-415](url)`); design file name unknown → `[Figma](url)`, `[Макет](url)`.
+- Several tasks → «Задачи:» with comma-separated links; several stories → «Стори:» likewise.
+- «Связано» holds at most 5 links, the closest first; MRs as `!<iid>` (GitLab) or `#<number>` (GitHub) plus their title.
 
 **Scale it to the diff.** A small change (≈ 10 changed lines, one concern) gets the short form:
 
@@ -103,7 +125,7 @@ Add `## Замечания` to the short form, and `## Зачем` / `## Зав�
 - **Done when** every behaviour change in the diff appears under «Что сделано».
 - **Radius** comes from searching the usages of the changed exports, selectors and styles (`git grep`), not from a guess.
 - **One-way door**: data migrations or writes, deletions, a published package version, an API contract other services already use, a removed feature flag.
-- **Links**: link task keys (`[SHOP-412](url)`) when the URL is given in the conversation, follows the pattern in `issue-tracker.md`, or follows another link of the same tracker in the conversation. Link related MRs, designs and docs where they're mentioned.
+- **Links** in the body follow the same rules as the sources: text links, URLs never guessed. A `## [KEY](url) — summary` heading per task still applies when there are several.
 - **Verification**: name only the checks that ran in this session — reviewers decide what to test from it.
 
 A filled-in example: [references/example.md](references/example.md) — read it only if unsure about the shape.
