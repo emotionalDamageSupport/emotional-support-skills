@@ -27,6 +27,8 @@ SCENARIOS = {s["id"]: s for s in json.loads((REPO / "evals" / "evals.json").read
 CHECK_TITLE = REPO / "skills" / "merge-request" / "scripts" / "check-title.sh"
 MR_URL = "https://gitlab.example.com/shop/web/-/merge_requests/101"
 TRAILER = re.compile(r"Co-Authored-By|Generated with|Claude-Session", re.I)
+# A text link to the task: [SHOP-1 ...](https://tracker.example.com/browse/SHOP-1), the pattern from the fixture's issue-tracker.md.
+TASK_LINK = lambda key: re.compile(r"\[" + key + r"[^\]]*\]\(https://tracker\.example\.com/browse/" + key + r"\)")
 TITLE = re.compile(r"(?:Draft: )?(?:[A-Z][A-Z0-9]+-\d+ )+(?:feat|fix|refactor|perf|docs|chore|ci|build|deps|test)!?: [^\n`*]+")
 
 
@@ -294,6 +296,7 @@ def checks(sid, root, work, ctx, reply):
         good = [t for t in titles if "SHOP-412" in t and title_ok(t)]
         add("title passes check-title", good, good[0] if good else f"found: {titles[:3]}")
         add("description sections", "Что сделано" in reply and "Blast radius" in reply)
+        add("task linked as text link", TASK_LINK("SHOP-412").search(reply))
         add("no attribution", not TRAILER.search(reply))
 
     elif sid == "mr-commit-and-create":
@@ -310,6 +313,8 @@ def checks(sid, root, work, ctx, reply):
         tgt = arg(creates[0], "--target-branch", "-b") if creates else ""
         add("MR created with valid title", creates and "SHOP-415" in t and title_ok(t), t)
         add("MR description has Blast radius", "Blast radius" in d and not TRAILER.search(d))
+        top = d.split("## ", 1)[0]
+        add("description opens with the task link", TASK_LINK("SHOP-415").search(top), top.strip()[:200])
         add("MR targets main", tgt in ("", "main"), tgt)
         add("reply has MR URL", MR_URL in reply)
         sections = re.search(r"Что сделано|Что проверить|Замечания|Blast radius", reply)

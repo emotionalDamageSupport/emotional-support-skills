@@ -11,6 +11,7 @@
       "No new commits",
       "The reply has a title that passes check-title.sh and carries SHOP-412",
       "The reply has a description with «Что сделано» and «Blast radius»",
+      "The description links SHOP-412 as a text link to the tracker URL from issue-tracker.md",
       "No attribution trailer or footer in the text"
     ]
   },
@@ -26,6 +27,7 @@
       "The uncommitted change is committed without asking: one commit with src/cart.js only; debug.log and .env.local stay uncommitted",
       "The commit message passes check-title.sh and has no attribution trailer",
       "The branch is pushed and the MR is created (glab) with a valid title, a Blast radius section and target main",
+      "The MR description opens with a text link to SHOP-415, built from the task URL pattern in issue-tracker.md, before the first section",
       "The reply is short: the MR URL and what was committed, without repeating the MR text"
     ]
   },

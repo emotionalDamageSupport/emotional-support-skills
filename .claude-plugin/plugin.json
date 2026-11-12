@@ -1,7 +1,7 @@
 {
   "name": "emotional-support-skills",
-  "version": "0.2.4",
-  "description": "Agent skills for everyday engineering chores: merge requests with a blast radius, branch updates, black-box QA against requirements, and frontend checks in the browser.",
+  "version": "0.2.6",
+  "description": "Agent skills for everyday engineering chores: merge requests with a blast radius, branch updates, black-box QA against requirements, frontend checks in the browser, and the daily standup message.",
   "author": {
     "name": "emotionalDamageSupport",
     "url": "https://github.com/emotionalDamageSupport"
@@ -20,7 +20,8 @@
     "./skills/pull-push",
     "./skills/push",
     "./skills/blackbox-qa",
-    "./skills/frontend-verify"
+    "./skills/frontend-verify",
+    "./skills/standup"
   ],
   "license": "MIT"
 }
