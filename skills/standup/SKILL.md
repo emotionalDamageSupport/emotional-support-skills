@@ -62,7 +62,7 @@ git -C <repo> reflog --date=iso      # what was actually worked on: checkouts, r
 git -C <repo> status                 # unpushed WIP is work too
 ```
 
-**Tracker:** tasks the user changed in the window (statuses, comments, worklogs), and `issue_get` on every task key found in git — for the human title, the parent and the URL.
+**Tracker:** tasks the user changed in the window (statuses, comments, worklogs), and `issue_get` on every task key found in git — for the human title, the parent and the URL. Plus the user's open tasks in the current sprint — assignee is the user, no resolution, the latest sprint in their `sprint` field: candidates for «Сегодня» (step 7).
 
 **GitLab:** the user's MRs in every active repo — created, updated, merged, closed. Plus **reviews of other people's MRs**: comments and approvals in the window. Git doesn't show them, and for the team they're a result.
 
@@ -88,7 +88,8 @@ The same topic often runs in parallel in several repos under different names: `S
 ## 5. Collapse into items
 
 - Group **by task, not by repo or commit**. One task spread over frontend, ui-kit and mobile is **one item**. Mention a repo only when it matters ("вынес в ui-kit", "в мобилке через плагин").
-- Several tasks of one product or epic done the same day → **one item** that opens with the product and names each result with its own link: «Почти весь день сидел на Кассе. Чек теперь [делится по гостям](…), а скидки [считаются после сервисного сбора](…).»
+- **One sentence per item.** What exactly changed inside a feature belongs in the task, not the message. A second sentence only for a short note that changes what the team expects (below).
+- Several tasks of one product or epic done the same day → **one item** that opens with the product and names each result with its own link: «На Кассе чек теперь [делится по гостям](…), а скидки [считаются после сервисного сбора](…).»
 - The wording comes from the task's summary, rephrased into a sentence. No tracker → the most meaningful commit or the branch name, never a service commit.
 - Drop the noise: merge commits, `style:`, `chore:`, formatting, import fixes, rebases. There are many of them, but they don't make an item.
 - Work without a task (`docs: document Makefile targets`) → its own item, or a line «по мелочи».
@@ -111,11 +112,18 @@ The message carries links, not task keys:
 
 ## 7. «Сегодня»
 
-The user's plan for the day, not a tracker export. Short lines in the present tense with links where there's a task: «Вливаю [пресеты периодов](…): завтра они уходят в тест», «Начинаю [логи для виджетов](…)», «Проверяю вчерашние задачи на устройстве».
+The user's plan for the day, not a tracker export. Short lines, first person, future tense, with links where there's a task: «Волью [пресеты периодов](…): завтра они уходят в тест», «Начну [логи для виджетов](…)», «Проверю вчерашние задачи на устройстве».
 
-Topics come only from yesterday's unfinished work: uncommitted WIP, branches without an MR, MRs waiting to be merged, loose ends from the session history. Nothing made up beyond that. Usually 2–6 lines.
+Topics, in this order:
 
-Not in the message: tracker tasks "in progress" the user didn't touch yesterday, "жду результатов теста", "на меня назначен баг", MRs waiting for the user's review, lists of open questions. If there are any, mention them in the footnote, one line each — the user decides.
+1. Yesterday's unfinished work: uncommitted WIP, branches without an MR, MRs waiting to be merged, loose ends from the session history.
+2. When that leaves 0–1 lines (everything got merged yesterday), the user's open sprint tasks from step 3, recently updated ones first. Don't put them in on your own: list them under the message as candidates and ask which go in.
+
+Nothing made up beyond that. Usually 2–6 lines.
+
+A dependency that decides when work starts is part of the plan — write it as the user's action: «Как бэк будет готов, начну [экспорт отчётов](…)», «Получу апрув от дизайна и волью [Drawer](…)». A bare wait with no action of the user's is not: «жду результатов теста», «жду бэк».
+
+Not in the message: sprint tasks the user didn't pick, "на меня назначен баг", MRs waiting for the user's review, lists of open questions. If there are any, mention them in the footnote, one line each — the user decides.
 
 Meetings (1:1s, calls) the user adds by hand — remind them in the footnote.
 
@@ -140,17 +148,18 @@ A reference for tone and length (made-up products and URLs):
 ```markdown
 Всем привет!
 **Вчера:**
-- Почти весь день сидел на Кассе. Чек теперь [делится по гостям](https://tracker.example.com/SHOP-412), а если терминал отклоняет оплату, официант видит [понятную причину](https://tracker.example.com/SHOP-418). Настройки зала теперь [хранятся на бэкенде](https://tracker.example.com/SHOP-421) и сохраняются после выхода из аккаунта.
-- Продумал [историю заказов гостя](https://tracker.example.com/SHOP-430) и завёл по ней задачи на бэк и мобилку. Начал делать мобилку.
+- На Кассе чек теперь [делится по гостям](https://tracker.example.com/SHOP-412), официант видит [причину отказа терминала](https://tracker.example.com/SHOP-418), а настройки зала [хранятся на бэкенде](https://tracker.example.com/SHOP-421).
+- Продумал [историю заказов гостя](https://tracker.example.com/SHOP-430) и завёл по ней задачи на бэк и мобилку.
 - Довёл фронт [фильтра по датам в отчётах](https://tracker.example.com/SHOP-402), бэк уже готов.
 - Принял [компонент Drawer](https://tracker.example.com/UI-77) в ui-kit, отписал всё в задачу по разработке.
 - Расписал стратегию [логов для виджетов](https://wiki.example.com/widgets/logs).
 - Ревью MR по [атрибуции в виджетах](https://gitlab.example.com/shop/widgets/-/merge_requests/214).
 
 **Сегодня:**
-- Вливаю [фильтр по датам](https://gitlab.example.com/shop/web/-/merge_requests/1031): завтра он уходит в тест.
-- Делаю мобильную часть [истории заказов](https://tracker.example.com/SHOP-431). Пока бэк не готов, работаю на моках.
-- Проверяю вчерашние задачи по Кассе на устройстве и собираю сборку для теста.
+- Волью [фильтр по датам](https://gitlab.example.com/shop/web/-/merge_requests/1031): завтра он уходит в тест.
+- Начну мобильную часть [истории заказов](https://tracker.example.com/SHOP-431), пока бэк не готов — на моках.
+- Как бэк будет готов, начну [экспорт отчётов](https://tracker.example.com/SHOP-440).
+- Проверю вчерашние задачи по Кассе на устройстве.
 ```
 
 **No emoji** — neither here nor in any other variant. Don't add them for mood.
@@ -162,4 +171,4 @@ Below, **outside the block**, a short footnote:
 - which repos had activity, so the user notices one that wasn't picked up;
 - which sources didn't answer and what is unverified because of it; phrases left without a link;
 - what the user may want to add by hand: calls, 1:1s, voice discussions, debugging that left no trace;
-- what didn't make it into «Сегодня» but may matter: tracker tasks "in progress", MRs waiting for the user's review, open questions from the sessions — one line each.
+- what didn't make it into «Сегодня» but may matter: sprint tasks not picked, MRs waiting for the user's review, open questions from the sessions — one line each.
